@@ -294,5 +294,8 @@ switch ($Command)
 	"lint" { Lint }
 	"smoke" { Build; Smoke }
 	"test" { Build; Test }
-	"check" { Build; Lint; Smoke; Test }
+	"check" { Build; Lint; Smoke; Test; Write-Host "Check passed." -ForegroundColor Green }
 }
+
+# Failures exit early with code 1, so reaching this point means success.
+exit 0
