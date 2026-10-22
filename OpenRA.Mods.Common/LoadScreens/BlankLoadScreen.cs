@@ -61,6 +61,7 @@ namespace OpenRA.Mods.Common.LoadScreens
 			if (connect != null)
 			{
 				Game.LoadShellMap();
+				Game.SetLobbyOptionsWhenAdmin(Launch.LobbyOptions);
 				Game.RemoteDirectConnect(connect);
 				return;
 			}
@@ -68,7 +69,7 @@ namespace OpenRA.Mods.Common.LoadScreens
 			// Start a map directly
 			if (!string.IsNullOrEmpty(Launch.Map))
 			{
-				Game.LoadMap(Launch.Map);
+				Game.LoadMap(Launch.Map, Launch.LobbyOptions);
 				return;
 			}
 

@@ -7,7 +7,8 @@
 #   .\coop lint     Lint the mod/maps only.
 #
 # Options: -Map <folder name>  (default coop-01), -NoBuild, -Fullscreen, -Port <n> (duo, default 1234),
-#          -Timeout <seconds> (smoke, default 90)
+#          -Timeout <seconds> (smoke, default 90),
+#          -Fog (play with normal shroud and fog of war; by default the whole map is revealed for debugging)
 
 param(
 	[Parameter(Position = 0)]
@@ -17,7 +18,8 @@ param(
 	[switch]$NoBuild,
 	[switch]$Fullscreen,
 	[int]$Port = 1234,
-	[int]$Timeout = 90
+	[int]$Timeout = 90,
+	[switch]$Fog
 )
 
 $ErrorActionPreference = "Stop"
@@ -48,6 +50,13 @@ function GameArgs([string[]]$extra)
 {
 	$display = if ($Fullscreen) { @() } else { @("Graphics.Mode=Windowed", "Graphics.WindowedSize=1280,800") }
 	return @("bin\OpenRA.dll", "--", "Engine.EngineDir=..", "Engine.LaunchPath=$Root\launch-game.cmd", "Game.Mod=$Mod") + $display + $extra
+}
+
+# Lobby options applied by the host: reveal the whole map unless -Fog is given.
+function LobbyOptionsArg
+{
+	if ($Fog) { return @() }
+	return @("Launch.LobbyOptions=explored=True,fog=False")
 }
 
 function StartGame([string[]]$extra)
@@ -91,7 +100,7 @@ function Smoke
 {
 	Write-Host "Smoke testing map '$Map' (timeout ${Timeout}s)..." -ForegroundColor Cyan
 	$since = (Get-Date).AddSeconds(-1)
-	$game = StartGame @("Launch.Map=$Map", "Sound.Mute=True")
+	$game = StartGame (@("Launch.Map=$Map", "Sound.Mute=True") + (LobbyOptionsArg))
 	$deadline = (Get-Date).AddSeconds($Timeout)
 	$markerSeenAt = $null
 	$result = $null
@@ -147,7 +156,8 @@ function Duo
 	Start-Sleep -Seconds 3
 
 	$clients = @(
-		(StartGame @("Launch.Connect=127.0.0.1:$Port", "Player.Name=P1")),
+		# P1 joins first and becomes the lobby admin, so only it needs to set the lobby options.
+		(StartGame (@("Launch.Connect=127.0.0.1:$Port", "Player.Name=P1") + (LobbyOptionsArg))),
 		(StartGame @("Launch.Connect=127.0.0.1:$Port", "Player.Name=P2")))
 
 	Write-Host "Two clients launched. Click Ready in both lobby windows to start. Close both clients to stop the server." -ForegroundColor Yellow
@@ -161,7 +171,7 @@ switch ($Command)
 	"play"
 	{
 		Build
-		StartGame @("Launch.Map=$Map") | Out-Null
+		StartGame (@("Launch.Map=$Map") + (LobbyOptionsArg)) | Out-Null
 	}
 	"duo" { Build; Duo }
 	"lint" { Lint }

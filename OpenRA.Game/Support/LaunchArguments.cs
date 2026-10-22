@@ -31,6 +31,10 @@ namespace OpenRA
 		[Desc("Automatically start playing the given map.")]
 		public string Map;
 
+		[Desc("Lobby options to set when starting with Launch.Map, or when joining a server as its admin.",
+			"Given as a comma separated list of id=value pairs, e.g. explored=True,fog=False.")]
+		public string LobbyOptions;
+
 		public LaunchArguments(Arguments args)
 		{
 			if (args == null)

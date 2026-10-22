@@ -999,13 +999,46 @@ namespace OpenRA
 			benchmark = new Benchmark(prefix);
 		}
 
-		public static void LoadMap(string launchMap)
+		static IEnumerable<Order> LobbyOptionOrders(string lobbyOptions)
 		{
-			var orders = new List<Order>
+			if (string.IsNullOrEmpty(lobbyOptions))
+				yield break;
+
+			foreach (var option in lobbyOptions.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
 			{
-				Order.Command("option gamespeed default"),
-				Order.Command($"state {Session.ClientState.Ready}")
-			};
+				var kv = option.Split('=', 2, StringSplitOptions.TrimEntries);
+				if (kv.Length == 2)
+					yield return Order.Command($"option {kv[0]} {kv[1]}");
+				else
+					Log.Write("client", $"Ignoring malformed lobby option `{option}`, expected id=value.");
+			}
+		}
+
+		/// <summary>Sets the given lobby options as soon as the local client is the admin of the lobby.</summary>
+		public static void SetLobbyOptionsWhenAdmin(string lobbyOptions)
+		{
+			var orders = LobbyOptionOrders(lobbyOptions).ToList();
+			if (orders.Count == 0)
+				return;
+
+			void SetOptions()
+			{
+				if (OrderManager?.LocalClient?.IsAdmin != true)
+					return;
+
+				LobbyInfoChanged -= SetOptions;
+				foreach (var o in orders)
+					OrderManager.IssueOrder(o);
+			}
+
+			LobbyInfoChanged += SetOptions;
+		}
+
+		public static void LoadMap(string launchMap, string lobbyOptions = null)
+		{
+			var orders = new List<Order> { Order.Command("option gamespeed default") };
+			orders.AddRange(LobbyOptionOrders(lobbyOptions));
+			orders.Add(Order.Command($"state {Session.ClientState.Ready}"));
 
 			var map = ModData.MapCache.SingleOrDefault(m => m.Uid == launchMap || Path.GetFileName(m.Path) == launchMap);
 			if (map == null)
