@@ -1,3 +1,12 @@
 World:
 	LuaScript:
-		Scripts: utils.lua, campaign.lua, coop01.lua
+		Scripts: utils.lua, campaign.lua, cooptest.lua, coop01.lua, coop01-tests.lua
+	ScriptLobbyDropdown@test:
+		ID: test
+		Label: dropdown-coop-test.label
+		Description: dropdown-coop-test.description
+		Values:
+			none: options-coop-test.none
+			first-wave: coop01-test-first-wave
+		Default: none
+		Visible: False

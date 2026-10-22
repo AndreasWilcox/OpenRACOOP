@@ -50,3 +50,6 @@ update.log
 
 # IntelliJ files
 .idea
+
+# Screenshots copied by the coop.ps1 test runner
+test-results/

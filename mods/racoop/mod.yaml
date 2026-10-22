@@ -18,6 +18,7 @@ FileSystem: ContentInstallerFileSystem
 		~^SupportDir|Content/ra/v2/: content
 		common|scripts
 		ra|scripts
+		racoop|scripts
 		ra|uibits
 	ContentPackages:
 		content|allies.mix
@@ -313,6 +314,11 @@ GameSpeeds:
 			Name: options-game-speed.fastest
 			Timestep: 20
 			OrderLatency: 6
+		# Used by the automated `coop test` runs to fast-forward the simulation.
+		test:
+			Name: racoop-game-speed-test
+			Timestep: 5
+			OrderLatency: 12
 
 DiscordService:
 	ApplicationId: 699222659766026240

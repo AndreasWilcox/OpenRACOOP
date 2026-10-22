@@ -99,7 +99,16 @@ namespace OpenRA.Platforms.Default
 
 		public bool HasInputFocus { get; internal set; }
 
-		public bool IsSuspended { get; internal set; }
+		static readonly bool IsHiddenWindowRequested = Environment.GetEnvironmentVariable("OPENRA_HIDDEN_WINDOW") == "1";
+
+		bool isSuspended;
+		public bool IsSuspended
+		{
+			get => isSuspended;
+
+			// A window that was hidden on request must keep rendering so that screenshots work
+			internal set => isSuspended = value && !IsHiddenWindowRequested;
+		}
 
 		public GLProfile GLProfile
 		{
@@ -225,14 +234,19 @@ namespace OpenRA.Platforms.Default
 
 				Console.WriteLine($"Using resolution: {windowSize.Width}x{windowSize.Height}");
 
-				const SDL.SDL_WindowFlags WindowFlags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
+				var windowFlags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
+
+				// Launch the game with OPENRA_HIDDEN_WINDOW=1 to run without showing a window (e.g. for automated tests).
+				// The game still renders to its offscreen buffers, so screenshots keep working.
+				if (IsHiddenWindowRequested)
+					windowFlags |= SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN;
 
 				// HiDPI doesn't work properly on OSX with (legacy) fullscreen mode
 				if (Platform.CurrentPlatform == PlatformType.OSX && windowMode == WindowMode.Fullscreen)
 					SDL.SDL_SetHint(SDL.SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
 
 				window = SDL.SDL_CreateWindow("OpenRA", SDL.SDL_WINDOWPOS_CENTERED_DISPLAY(videoDisplay), SDL.SDL_WINDOWPOS_CENTERED_DISPLAY(videoDisplay),
-					windowSize.Width, windowSize.Height, WindowFlags);
+					windowSize.Width, windowSize.Height, windowFlags);
 
 				if (Platform.CurrentPlatform == PlatformType.Linux)
 				{

@@ -1,24 +1,31 @@
 ####### Dev loop for the Red Alert co-op mod (mods/racoop) #######
 #
-#   .\coop [play]   Build and jump straight into the co-op map (single client).
-#   .\coop duo      Build, start a local dedicated server and two clients to test co-op on one PC.
-#   .\coop check    Build, lint the mod/maps, then run the smoke test.
+#   .\coop [play]   Build and jump straight into the co-op map in a visible window, for playtesting.
+#   .\coop duo      Build, start a local dedicated server and two visible clients to test co-op on one PC.
+#   .\coop check    Build, lint the mod/maps, then run the smoke test and all test scenarios.
 #   .\coop smoke    Launch the map, wait for the Lua script to start, and fail on Lua errors or crashes.
+#   .\coop test     Run the map's automated test scenarios (see mods/racoop/scripts/cooptest.lua).
 #   .\coop lint     Lint the mod/maps only.
 #
+# smoke, test and check run the game in a hidden window (no window or console pops up); play and duo never do.
+#
 # Options: -Map <folder name>  (default coop-01), -NoBuild, -Fullscreen, -Port <n> (duo, default 1234),
-#          -Timeout <seconds> (smoke, default 90),
+#          -Timeout <seconds> (smoke/test, per run, default 90),
+#          -Scenario <name> (test: run only this scenario; default runs all of the map's scenarios),
+#          -Show (smoke/test: show the game window instead of hiding it, for debugging),
 #          -Fog (play with normal shroud and fog of war; by default the whole map is revealed for debugging)
 
 param(
 	[Parameter(Position = 0)]
-	[ValidateSet("play", "duo", "check", "smoke", "lint")]
+	[ValidateSet("play", "duo", "check", "smoke", "test", "lint")]
 	[string]$Command = "play",
 	[string]$Map = "coop-01",
 	[switch]$NoBuild,
 	[switch]$Fullscreen,
 	[int]$Port = 1234,
 	[int]$Timeout = 90,
+	[string]$Scenario,
+	[switch]$Show,
 	[switch]$Fog
 )
 
@@ -53,15 +60,37 @@ function GameArgs([string[]]$extra)
 }
 
 # Lobby options applied by the host: reveal the whole map unless -Fog is given.
-function LobbyOptionsArg
+function LobbyOptions([string[]]$extra = @())
 {
-	if ($Fog) { return @() }
-	return @("Launch.LobbyOptions=explored=True,fog=False")
+	$options = @($extra)
+	if (-not $Fog) { $options += @("explored=True", "fog=False") }
+	if ($options.Count -eq 0) { return @() }
+	return @("Launch.LobbyOptions=" + ($options -join ","))
 }
 
+# Starts a visible game, for the user to play.
 function StartGame([string[]]$extra)
 {
 	return Start-Process $dotnet -ArgumentList (GameArgs $extra) -PassThru
+}
+
+# Starts a game for automated runs: hidden window and console unless -Show is given.
+function StartAutomatedGame([string[]]$extra)
+{
+	$gameArgs = GameArgs (@("Sound.Mute=True") + $extra)
+
+	# Environment variables are inherited by the game process and read by the engine.
+	$env:OPENRA_SCREENSHOT_DIR = ResultsDir
+	if (-not $Show) { $env:OPENRA_HIDDEN_WINDOW = "1" }
+	try
+	{
+		if ($Show) { return Start-Process $dotnet -ArgumentList $gameArgs -PassThru }
+		return Start-Process $dotnet -ArgumentList $gameArgs -PassThru -WindowStyle Hidden
+	}
+	finally
+	{
+		Remove-Item Env:\OPENRA_SCREENSHOT_DIR, Env:\OPENRA_HIDDEN_WINDOW -ErrorAction SilentlyContinue
+	}
 }
 
 # Same lookup order as launch-game.cmd's crash dialog.
@@ -70,6 +99,12 @@ function LogDir
 	if (Test-Path "$Root\Support\Logs") { return "$Root\Support\Logs" }
 	if (Test-Path "$env:USERPROFILE\Documents\OpenRA\Logs") { return "$env:USERPROFILE\Documents\OpenRA\Logs" }
 	return "$env:APPDATA\OpenRA\Logs"
+}
+
+# Screenshots taken by automated runs are saved here (gitignored) instead of the user's Screenshots folder.
+function ResultsDir
+{
+	return Join-Path $Root "test-results\$Map"
 }
 
 # Reads the log files matching $pattern that were written after $since, otherwise returns "".
@@ -82,6 +117,34 @@ function ReadFreshLog([string]$pattern, [datetime]$since)
 		ForEach-Object { $text += (Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue) + "" }
 
 	return $text
+}
+
+# Polls the logs of a running game until $evaluate (given the lua.log text) returns "PASS" or a failure
+# message, the game crashes or exits, or the timeout expires. Always stops the game. Returns the result.
+function WatchGame($game, [datetime]$since, [scriptblock]$evaluate, [string]$waitingFor)
+{
+	$deadline = (Get-Date).AddSeconds($Timeout)
+	$result = $null
+	while ($null -eq $result)
+	{
+		Start-Sleep -Milliseconds 500
+		$lua = ReadFreshLog "lua.log" $since
+		$exception = ReadFreshLog "exception*.log" $since
+
+		if ($exception) { $result = "FAIL: engine exception`n$exception" }
+		elseif ($lua -match "Fatal Lua Error") { $result = "FAIL: Lua error`n$lua" }
+		elseif ($game.HasExited) { $result = "FAIL: game exited early (code $($game.ExitCode))" }
+		else
+		{
+			$result = & $evaluate $lua
+			if ($null -eq $result -and (Get-Date) -ge $deadline) { $result = "FAIL: timed out after ${Timeout}s waiting for $waitingFor" }
+		}
+	}
+
+	# Give a pending screenshot a moment to be written before stopping the game.
+	if ($result -eq "PASS") { Start-Sleep -Seconds 1 }
+	if (-not $game.HasExited) { Stop-Process -Id $game.Id -Force }
+	return $result
 }
 
 function Lint
@@ -100,35 +163,22 @@ function Smoke
 {
 	Write-Host "Smoke testing map '$Map' (timeout ${Timeout}s)..." -ForegroundColor Cyan
 	$since = (Get-Date).AddSeconds(-1)
-	$game = StartGame (@("Launch.Map=$Map", "Sound.Mute=True") + (LobbyOptionsArg))
-	$deadline = (Get-Date).AddSeconds($Timeout)
-	$markerSeenAt = $null
-	$result = $null
+	$game = StartAutomatedGame (@("Launch.Map=$Map") + (LobbyOptions))
 
-	while ($null -eq $result)
-	{
-		Start-Sleep -Milliseconds 500
-		$lua = ReadFreshLog "lua.log" $since
-		$exception = ReadFreshLog "exception*.log" $since
-
-		if ($exception) { $result = "FAIL: engine exception`n$exception" }
-		elseif ($lua -match "Fatal Lua Error") { $result = "FAIL: Lua error`n$lua" }
-		elseif ($game.HasExited) { $result = "FAIL: game exited early (code $($game.ExitCode))" }
-		elseif ($lua -match "coop: WorldLoaded")
-		{
-			# Let the game tick for a while after the script started, to catch early runtime errors.
-			if ($null -eq $markerSeenAt) { $markerSeenAt = Get-Date }
-			elseif ((Get-Date) -ge $markerSeenAt.AddSeconds(10)) { $result = "PASS" }
-		}
-		elseif ((Get-Date) -ge $deadline) { $result = "FAIL: timed out waiting for 'coop: WorldLoaded' in lua.log" }
-	}
-
-	if (-not $game.HasExited) { Stop-Process -Id $game.Id -Force }
+	# Let the game tick for a while after the script started, to catch early runtime errors.
+	$script:markerSeenAt = $null
+	$result = WatchGame $game $since {
+		param($lua)
+		if ($lua -notmatch "coop: WorldLoaded") { return $null }
+		if ($null -eq $script:markerSeenAt) { $script:markerSeenAt = Get-Date }
+		if ((Get-Date) -ge $script:markerSeenAt.AddSeconds(10)) { return "PASS" }
+		return $null
+	} "'coop: WorldLoaded' in lua.log"
 
 	if ($result -eq "PASS")
 	{
 		Write-Host "Smoke test passed." -ForegroundColor Green
-		(ReadFreshLog "lua.log" $since) -split "`n" | Where-Object { $_ -match "coop:" } | ForEach-Object { Write-Host "  $_" }
+		(ReadFreshLog "lua.log" $since) -split "`n" | Where-Object { $_ -match "coop:" } | ForEach-Object { Write-Host "  $($_.Trim())" }
 	}
 	else
 	{
@@ -136,6 +186,73 @@ function Smoke
 		Write-Host "Logs: $(LogDir)"
 		exit 1
 	}
+}
+
+# Reads the scenario ids from the map's hidden `ScriptLobbyDropdown@test` values (excluding "none").
+function MapScenarios
+{
+	$scenarios = @()
+	$inDropdown = $false
+	$inValues = $false
+	foreach ($line in Get-Content "mods\$Mod\maps\$Map\rules.yaml" -ErrorAction SilentlyContinue)
+	{
+		if ($line -match "^\tScriptLobbyDropdown@test:") { $inDropdown = $true; continue }
+		if (-not $inDropdown) { continue }
+		if ($line -notmatch "^\t\t") { break }
+		if ($line -match "^\t\tValues:") { $inValues = $true; continue }
+		if ($inValues -and $line -match "^\t\t\t([^:\s]+):") { if ($Matches[1] -ne "none") { $scenarios += $Matches[1] } }
+		elseif ($line -match "^\t\t\S") { $inValues = $false }
+	}
+
+	return $scenarios
+}
+
+function RunScenario([string]$name)
+{
+	Write-Host "Test '$Map/$name'..." -ForegroundColor Cyan
+	$since = (Get-Date).AddSeconds(-1)
+	$started = Get-Date
+	$game = StartAutomatedGame (@("Launch.Map=$Map") + (LobbyOptions @("test=$name", "gamespeed=test")))
+
+	$result = WatchGame $game $since {
+		param($lua)
+		if ($lua -match "coop-test: FAIL (.*)") { return "FAIL: $($Matches[1].Trim())" }
+		if ($lua -match "coop-test: PASS") { return "PASS" }
+		return $null
+	} "'coop-test: PASS' or 'FAIL' in lua.log"
+
+	(ReadFreshLog "lua.log" $since) -split "`n" | Where-Object { $_ -match "coop-test:" } | ForEach-Object { Write-Host "  $($_.Trim())" }
+	Get-ChildItem (ResultsDir) -Filter "$name-*.png" -ErrorAction SilentlyContinue |
+		Where-Object { $_.LastWriteTime -ge $since } | ForEach-Object { Write-Host "  screenshot: $($_.FullName)" }
+
+	$elapsed = [int]((Get-Date) - $started).TotalSeconds
+	if ($result -eq "PASS")
+	{
+		Write-Host "  PASS ($elapsed s)" -ForegroundColor Green
+		return $true
+	}
+
+	Write-Host "  $result" -ForegroundColor Red
+	return $false
+}
+
+function Test
+{
+	$scenarios = if ($Scenario) { @($Scenario) } else { @(MapScenarios) }
+	if ($scenarios.Count -eq 0)
+	{
+		Write-Host "No test scenarios found for map '$Map'." -ForegroundColor Yellow
+		return
+	}
+
+	$failed = @($scenarios | Where-Object { -not (RunScenario $_) })
+	if ($failed.Count -gt 0)
+	{
+		Write-Host "$($failed.Count) of $($scenarios.Count) scenario(s) failed: $($failed -join ', '). Logs: $(LogDir)" -ForegroundColor Red
+		exit 1
+	}
+
+	Write-Host "All $($scenarios.Count) scenario(s) passed." -ForegroundColor Green
 }
 
 function Duo
@@ -157,7 +274,7 @@ function Duo
 
 	$clients = @(
 		# P1 joins first and becomes the lobby admin, so only it needs to set the lobby options.
-		(StartGame (@("Launch.Connect=127.0.0.1:$Port", "Player.Name=P1") + (LobbyOptionsArg))),
+		(StartGame (@("Launch.Connect=127.0.0.1:$Port", "Player.Name=P1") + (LobbyOptions))),
 		(StartGame @("Launch.Connect=127.0.0.1:$Port", "Player.Name=P2")))
 
 	Write-Host "Two clients launched. Click Ready in both lobby windows to start. Close both clients to stop the server." -ForegroundColor Yellow
@@ -171,10 +288,11 @@ switch ($Command)
 	"play"
 	{
 		Build
-		StartGame (@("Launch.Map=$Map") + (LobbyOptionsArg)) | Out-Null
+		StartGame (@("Launch.Map=$Map") + (LobbyOptions)) | Out-Null
 	}
 	"duo" { Build; Duo }
 	"lint" { Lint }
 	"smoke" { Build; Smoke }
-	"check" { Build; Lint; Smoke }
+	"test" { Build; Test }
+	"check" { Build; Lint; Smoke; Test }
 }

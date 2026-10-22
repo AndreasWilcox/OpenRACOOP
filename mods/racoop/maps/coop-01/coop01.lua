@@ -21,6 +21,8 @@ SendFirstWave = function()
 			player.MarkCompletedObjective(SurviveObjectives[player.InternalName])
 		end)
 	end)
+
+	return wave
 end
 
 WorldLoaded = function()
@@ -40,4 +42,6 @@ WorldLoaded = function()
 
 	-- Marker checked by `coop smoke` to prove the script loaded and ran.
 	print("coop: WorldLoaded with " .. #Humans .. " human player(s)")
+
+	CoopTest.Run(Scenarios)
 end

@@ -59,6 +59,7 @@ namespace OpenRA
 		public static LocalPlayerProfile LocalPlayerProfile;
 
 		static bool takeScreenshot = false;
+		static string screenshotName = null;
 		static Benchmark benchmark = null;
 
 		public static event Action OnShellmapLoaded = () => { };
@@ -609,11 +610,15 @@ namespace OpenRA
 		{
 			using (new PerfTimer("Renderer.SaveScreenshot"))
 			{
-				var mod = ModData.Manifest.Metadata;
-				var directory = Path.Combine(Platform.SupportDir, "Screenshots", ModData.Manifest.Id, mod.Version);
+				// Launch the game with OPENRA_SCREENSHOT_DIR to save screenshots somewhere else (e.g. for automated tests)
+				var directory = Environment.GetEnvironmentVariable("OPENRA_SCREENSHOT_DIR");
+				if (string.IsNullOrEmpty(directory))
+					directory = Path.Combine(Platform.SupportDir, "Screenshots", ModData.Manifest.Id, ModData.Manifest.Metadata.Version);
+
 				Directory.CreateDirectory(directory);
 
-				var filename = TimestampedFilename(true);
+				var filename = screenshotName ?? TimestampedFilename(true);
+				screenshotName = null;
 				var path = Path.Combine(directory, $"{filename}.png");
 				Log.Write("debug", "Taking screenshot " + path);
 
@@ -693,8 +698,14 @@ namespace OpenRA
 			delayedActions.PerformActions(RunTime);
 		}
 
-		public static void TakeScreenshot()
+		/// <summary>Saves a screenshot after the next rendered frame, named by timestamp unless a file name is given.</summary>
+		public static void TakeScreenshot(string name = null)
 		{
+			if (name != null)
+				foreach (var c in Path.GetInvalidFileNameChars())
+					name = name.Replace(c, '_');
+
+			screenshotName = name;
 			takeScreenshot = true;
 		}
 
