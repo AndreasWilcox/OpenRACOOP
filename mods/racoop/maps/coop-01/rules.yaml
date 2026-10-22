@@ -7,6 +7,6 @@ World:
 		Description: dropdown-coop-test.description
 		Values:
 			none: options-coop-test.none
-			first-wave: coop01-test-first-wave
+			waves: coop01-test-waves
 		Default: none
 		Visible: False

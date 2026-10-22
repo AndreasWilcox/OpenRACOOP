@@ -1,7 +1,5 @@
 ## coop01.lua
-coop01-welcome = Welcome, commanders. Build up together and wipe out the Soviet base in the east.
-coop01-survive-first-wave = Survive the first Soviet attack wave.
-coop01-wave-incoming = Soviet attack wave incoming from the east!
+coop01-welcome = Welcome, commanders. Soviet troops will attack from the east in waves. Hold the line together!
 
 ## Automated test scenarios (hidden lobby option, see racoop|scripts/cooptest.lua)
 dropdown-coop-test =
@@ -11,4 +9,4 @@ dropdown-coop-test =
 options-coop-test =
     .none = None
 
-coop01-test-first-wave = First wave
+coop01-test-waves = Waves

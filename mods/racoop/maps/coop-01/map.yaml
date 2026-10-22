@@ -47,7 +47,7 @@ Players:
 		Enemies: Multi0, Multi1
 	PlayerReference@Enemy:
 		Name: Enemy
-		Bot: normal
+		NonCombatant: True
 		Faction: soviet
 		Color: FE1100
 		HomeLocation: 96,14
@@ -426,21 +426,6 @@ Actors:
 	Actor169: mpspawn
 		Owner: Neutral
 		Location: 14,22
-	EnemyMcv: mcv
-		Owner: Enemy
-		Location: 96,14
-	EnemyTank1: 3tnk
-		Owner: Enemy
-		Location: 92,12
-	EnemyTank2: 3tnk
-		Owner: Enemy
-		Location: 92,16
-	EnemyRifle1: e1
-		Owner: Enemy
-		Location: 90,13
-	EnemyRifle2: e1
-		Owner: Enemy
-		Location: 90,15
 
 Rules: rules.yaml
 
