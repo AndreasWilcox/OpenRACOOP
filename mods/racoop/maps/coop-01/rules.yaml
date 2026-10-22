@@ -1,0 +1,3 @@
+World:
+	LuaScript:
+		Scripts: utils.lua, campaign.lua, coop01.lua
