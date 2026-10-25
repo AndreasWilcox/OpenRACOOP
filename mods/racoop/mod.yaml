@@ -113,6 +113,7 @@ Cursors:
 
 Chrome:
 	ra|chrome.yaml
+	racoop|chrome.yaml
 
 Assemblies: OpenRA.Mods.Common.dll, OpenRA.Mods.Cnc.dll
 
@@ -129,7 +130,8 @@ ChromeLayout:
 	common|chrome/ingame-info-lobby-options.yaml
 	common|chrome/ingame-menu.yaml
 	ra|chrome/ingame-observer.yaml
-	ra|chrome/ingame-player.yaml
+	racoop|chrome/ingame-player.yaml
+	racoop|chrome/ingame-sendcash.yaml
 	common|chrome/ingame-perf.yaml
 	ra|chrome/ingame-debug.yaml
 	common|chrome/ingame-debug-hpf.yaml

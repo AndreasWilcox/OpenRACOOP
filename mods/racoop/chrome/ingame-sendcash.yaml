@@ -1,0 +1,78 @@
+Background@SEND_CASH_PANEL:
+	Logic: SendCashLogic
+	X: (WINDOW_WIDTH - WIDTH) / 2
+	Y: (WINDOW_HEIGHT - HEIGHT) / 2
+	Width: 520
+	Height: 270
+	Children:
+		Label@TITLE:
+			Y: 20
+			Width: PARENT_WIDTH
+			Height: 25
+			Font: Bold
+			Align: Center
+			Text: label-send-cash-title
+		ScrollPanel@PLAYER_LIST:
+			X: 20
+			Y: 55
+			Width: PARENT_WIDTH - 40
+			Height: 145
+			TopBottomSpacing: 5
+			ItemSpacing: 5
+			Children:
+				Container@PLAYER_TEMPLATE:
+					X: 2
+					Width: PARENT_WIDTH - 26
+					Height: 25
+					Children:
+						Label@NAME:
+							X: 8
+							Width: 130
+							Height: 25
+							Shadow: True
+						Button@MINUS_1000:
+							X: 142
+							Width: 56
+							Height: 25
+							Text: button-send-cash-minus-1000
+						Button@MINUS_100:
+							X: 202
+							Width: 50
+							Height: 25
+							Text: button-send-cash-minus-100
+						Label@AMOUNT:
+							X: 256
+							Width: 80
+							Height: 25
+							Font: Bold
+							Align: Center
+						Button@PLUS_100:
+							X: 340
+							Width: 50
+							Height: 25
+							Text: button-send-cash-plus-100
+						Button@PLUS_1000:
+							X: 394
+							Width: 56
+							Height: 25
+							Text: button-send-cash-plus-1000
+		Label@TOTAL:
+			X: 20
+			Y: PARENT_HEIGHT - 45
+			Width: 220
+			Height: 25
+			Font: Bold
+		Button@CLOSE_BUTTON:
+			X: PARENT_WIDTH - 260
+			Y: PARENT_HEIGHT - 45
+			Width: 110
+			Height: 25
+			Font: Bold
+			Text: button-send-cash-close
+		Button@SEND_BUTTON:
+			X: PARENT_WIDTH - 140
+			Y: PARENT_HEIGHT - 45
+			Width: 120
+			Height: 25
+			Font: Bold
+			Text: button-send-cash-send

@@ -1,2 +1,5 @@
 # Co-op specific rule overrides, loaded after all of Red Alert's rules.
 # Anything defined here is merged on top of the ra| definitions.
+
+Player:
+	CashTransfer:
