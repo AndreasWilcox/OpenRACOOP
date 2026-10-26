@@ -1,6 +1,6 @@
 World:
 	LuaScript:
-		Scripts: utils.lua, campaign.lua, cooptest.lua, twolane.lua, twolane-tests.lua
+		Scripts: utils.lua, campaign.lua, cooptest.lua, coopwaves.lua, waves.lua, twolane.lua, twolane-tests.lua
 	ScriptLobbyDropdown@test:
 		ID: test
 		Label: dropdown-coop-test.label
@@ -8,5 +8,8 @@ World:
 		Values:
 			none: options-coop-test.none
 			waves: twolane-test-waves
+			air: twolane-test-air
+			victory: twolane-test-victory
+			call-early: twolane-test-call-early
 		Default: none
 		Visible: False

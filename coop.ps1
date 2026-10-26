@@ -144,6 +144,9 @@ function WatchGame($game, [datetime]$since, [scriptblock]$evaluate, [string]$wai
 	# Give a pending screenshot a moment to be written before stopping the game.
 	if ($result -eq "PASS") { Start-Sleep -Seconds 1 }
 	if (-not $game.HasExited) { Stop-Process -Id $game.Id -Force }
+
+	# Wait for it to close: a game still holding lua.log makes the next run log to lua.log.1, which isn't read.
+	$game.WaitForExit(10000) | Out-Null
 	return $result
 }
 

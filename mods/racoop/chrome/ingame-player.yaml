@@ -305,6 +305,31 @@ Container@PLAYER_WIDGETS:
 					Align: Right
 					Text: label-mute-indicator
 					Contrast: true
+		Container@WAVE_STATUS:
+			Logic: WaveStatusLogic
+			X: (WINDOW_WIDTH - WIDTH) / 2
+			Y: 10
+			Width: 400
+			Height: 75
+			Children:
+				Label@STATUS:
+					Width: PARENT_WIDTH
+					Height: 20
+					Font: Bold
+					Align: Center
+					Contrast: true
+				Label@HINT:
+					Y: 20
+					Width: PARENT_WIDTH
+					Height: 20
+					Align: Center
+					Contrast: true
+				Button@CALL_NEXT_WAVE:
+					X: (PARENT_WIDTH - WIDTH) / 2
+					Y: 45
+					Width: 140
+					Height: 25
+					Text: button-call-next-wave
 		Image@SIDEBAR_BACKGROUND_TOP:
 			Logic: AddFactionSuffixLogic
 			X: WINDOW_WIDTH - 250

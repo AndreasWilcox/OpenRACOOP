@@ -1,5 +1,4 @@
 Player:
-	-ConquestVictoryConditions:
 	LobbyPrerequisiteCheckbox@GLOBALBOUNTY:
 		Enabled: False
 		Locked: True

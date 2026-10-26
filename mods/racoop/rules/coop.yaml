@@ -1,5 +1,43 @@
 # Co-op specific rule overrides, loaded after all of Red Alert's rules.
 # Anything defined here is merged on top of the ra| definitions.
 
+World:
+	WaveStatus:
+
 Player:
 	CashTransfer:
+	CallNextWave:
+	# The enemy is a non-combatant that only sends waves, so the conquest objective could never be completed.
+	# Winning and losing are handled by the wave script (racoop|scripts/coopwaves.lua) instead.
+	-ConquestVictoryConditions:
+
+# Units don't gain veterancy from kills: players promote them at the Upgrade Bay,
+# and enemy waves are given their rank when they spawn.
+^GainsExperience:
+	GainsExperienceMultiplier@NOAUTO:
+		Modifier: 0
+
+# Enemy aircraft have unlimited ammo: they have no airfield to rearm at, and keep attacking until shot down.
+# Only on the armed aircraft, as each needs exactly one ammo pool to reload.
+^WaveUnitAmmo:
+	# Granted by the wave script to the units it spawns.
+	ExternalCondition@WAVE:
+		Condition: wave-unit
+	ReloadAmmoPool@WAVE:
+		RequiresCondition: wave-unit
+		Delay: 10
+
+YAK:
+	Inherits@WAVEAMMO: ^WaveUnitAmmo
+
+MIG:
+	Inherits@WAVEAMMO: ^WaveUnitAmmo
+
+HELI:
+	Inherits@WAVEAMMO: ^WaveUnitAmmo
+
+HIND:
+	Inherits@WAVEAMMO: ^WaveUnitAmmo
+
+MH60:
+	Inherits@WAVEAMMO: ^WaveUnitAmmo

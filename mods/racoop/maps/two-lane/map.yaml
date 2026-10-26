@@ -105,4 +105,4 @@ Actors:
 
 Rules: rules.yaml
 
-FluentMessages: ra|fluent/lua.ftl, map.ftl
+FluentMessages: ra|fluent/lua.ftl, racoop|fluent/lua.ftl, map.ftl

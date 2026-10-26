@@ -17,3 +17,11 @@ button-send-cash-close = Close
 button-send-cash-send = Send
 notification-cash-received = { $player } sent you ${ $amount }.
 notification-cash-sent = Sent ${ $amount } to { $player }.
+
+## Enemy waves
+label-wave-status-first = First wave in { $time }
+label-wave-status-next = Wave { $wave } / { $total } · next in { $time }
+label-wave-status-final = Wave { $wave } / { $total }
+label-wave-status-hint = Next: { $hint }
+button-call-next-wave = Call next wave
+notification-wave-called = { $player } called the next wave.

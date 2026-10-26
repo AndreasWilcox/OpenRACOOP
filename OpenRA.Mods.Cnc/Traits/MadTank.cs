@@ -21,7 +21,7 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Cnc.Traits
 {
-	sealed class MadTankInfo : TraitInfo, IRulesetLoaded, Requires<FireWarheadsOnDeathInfo>, Requires<WithFacingSpriteBodyInfo>
+	public sealed class MadTankInfo : TraitInfo, IRulesetLoaded, Requires<FireWarheadsOnDeathInfo>, Requires<WithFacingSpriteBodyInfo>
 	{
 		[SequenceReference]
 		public readonly string ThumpSequence = "piston";
@@ -87,7 +87,7 @@ namespace OpenRA.Mods.Cnc.Traits
 		}
 	}
 
-	sealed class MadTank : IIssueOrder, IResolveOrder, IOrderVoice, IIssueDeployOrder
+	public sealed class MadTank : IIssueOrder, IResolveOrder, IOrderVoice, IIssueDeployOrder
 	{
 		readonly MadTankInfo info;
 
