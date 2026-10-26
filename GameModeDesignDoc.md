@@ -71,7 +71,7 @@ Only the units in a specific force can be bought by that force. All the units a 
 - Hind - Requires Helipad.
 - Longbow - Requires Helipad.
 - Yak - Requires Airfield.
-- MiG - Requires Airfield.
+- MiG - Requires Airfield and Tech Center.
 - Mobile Flak - Requires War Factory, is visible in Aircraft tab.
 
 ### Support
@@ -97,8 +97,8 @@ Each player starts with a Construction Yard which they can't undeploy. Building 
 ### Common buildings (all forces)
 - Upgrade Bay (use Chonosphere visual) - Requires force's construction building. Selecting the building and then clicking a unit promotes that unit to the next level of veterancy. Each promotion level costs 25% of unit cost. Promotions follow the [OpenRA veterancy](https://openra-red-alert.fandom.com/wiki/Veterancy), ie three chevron ranks plus Elite. The promotion is instant. Can only build one and the building costs 600.
 - Power Plant - now only increases all units/buildings damage by 10% for the player. Can build more than one, each one increases damage additively (ie, 3 buildings is 30% more damage). Initially costs 2000, price increases by 1000 for each building.
-- Radar Dome - now only increases all units/buildings attack range by 1 cell for the player. Costs 2500. Can also build more than one and range is increased additively (ie, 3 buildings is 3 cells extra range).
-- Tech Center - Unlocks support powers for the player (according to Powers heading). Initially costs 3000, price increases by 1500 for each building.
+- Radar Dome - now only increases all units/buildings attack range by 10% for the player. Costs 2000, price increases by 1000 for each building. Can also build more than one and range is increased additively (ie, 3 buildings is 30% extra range).
+- Tech Center - Unlocks support powers for the player (according to Powers heading). Costs 3000.
 - Service Depot - Repairing a unit is free. Costs 1000.
 
 ### Infantry
@@ -108,7 +108,7 @@ Each player starts with a Construction Yard which they can't undeploy. Building 
 - War Factory - Builds all tanks. Costs 1000.
 
 ### Air
-- Airfield - Builds Yak & MiG. Landing on it will repair in addition to rearming the craft. Repair should be done at same speed as Service Depot. Costs 500.
+- Airfield - Builds Yak & MiG. Landing on it will repair in addition to rearming the craft. Repair is free and should be done at same speed as Service Depot. Costs 500.
 - Helipad - Builds Hind & Longbow. Will repair as well as rearm, just as Airfield. Costs 600.
 - War Factory - Only builds Mobile Flak. Costs 400.
 
