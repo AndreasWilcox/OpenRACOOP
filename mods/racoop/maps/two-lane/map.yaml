@@ -1,0 +1,108 @@
+MapFormat: 12
+
+RequiresMod: racoop
+
+Title: Two Lanes
+
+Author: AndreasW
+
+Tileset: DESERT
+
+MapSize: 130,34
+
+Bounds: 1,1,128,32
+
+Visibility: Lobby
+
+Categories: Co-op
+
+Players:
+	PlayerReference@Neutral:
+		Name: Neutral
+		OwnsWorld: True
+		NonCombatant: True
+		Faction: england
+	PlayerReference@Multi0:
+		Name: Multi0
+		Playable: True
+		AllowBots: False
+		Faction: Random
+		LockTeam: True
+		Team: 1
+		Allies: Multi1, Multi2, Multi3
+		Enemies: Creeps, Enemy
+	PlayerReference@Multi1:
+		Name: Multi1
+		Playable: True
+		AllowBots: False
+		Faction: Random
+		LockTeam: True
+		Team: 1
+		Allies: Multi0, Multi2, Multi3
+		Enemies: Creeps, Enemy
+	PlayerReference@Multi2:
+		Name: Multi2
+		Playable: True
+		AllowBots: False
+		Faction: Random
+		LockTeam: True
+		Team: 1
+		Allies: Multi0, Multi1, Multi3
+		Enemies: Creeps, Enemy
+	PlayerReference@Multi3:
+		Name: Multi3
+		Playable: True
+		AllowBots: False
+		Faction: Random
+		LockTeam: True
+		Team: 1
+		Allies: Multi0, Multi1, Multi2
+		Enemies: Creeps, Enemy
+	PlayerReference@Creeps:
+		Name: Creeps
+		NonCombatant: True
+		Faction: england
+		Enemies: Multi0, Multi1, Multi2, Multi3
+	PlayerReference@Enemy:
+		Name: Enemy
+		NonCombatant: True
+		Faction: soviet
+		Color: FE1100
+		HomeLocation: 116,17
+		Enemies: Multi0, Multi1, Multi2, Multi3
+
+Actors:
+	Actor0: mpspawn
+		Owner: Neutral
+		Location: 8,7
+	Actor1: mpspawn
+		Owner: Neutral
+		Location: 17,4
+	Actor2: mpspawn
+		Owner: Neutral
+		Location: 8,25
+	Actor3: mpspawn
+		Owner: Neutral
+		Location: 17,28
+	NorthSpawn: waypoint
+		Owner: Neutral
+		Location: 128,11
+	NorthEastGap: waypoint
+		Owner: Neutral
+		Location: 101,11
+	NorthWestGap: waypoint
+		Owner: Neutral
+		Location: 26,8
+	SouthSpawn: waypoint
+		Owner: Neutral
+		Location: 128,23
+	SouthEastGap: waypoint
+		Owner: Neutral
+		Location: 101,22
+	SouthWestGap: waypoint
+		Owner: Neutral
+		Location: 26,24
+
+Rules: rules.yaml
+
+FluentMessages: ra|fluent/lua.ftl, map.ftl

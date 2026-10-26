@@ -1,0 +1,12 @@
+World:
+	LuaScript:
+		Scripts: utils.lua, campaign.lua, cooptest.lua, twolane.lua, twolane-tests.lua
+	ScriptLobbyDropdown@test:
+		ID: test
+		Label: dropdown-coop-test.label
+		Description: dropdown-coop-test.description
+		Values:
+			none: options-coop-test.none
+			waves: twolane-test-waves
+		Default: none
+		Visible: False
