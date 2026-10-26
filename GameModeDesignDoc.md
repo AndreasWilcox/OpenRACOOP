@@ -11,8 +11,33 @@ The current design is made for a minimum of 4 players but it's not a hard limit.
 The enemy does not have a base building feature but instead waves are continuously spawned and sent in intervals (like in tower defence).
 What units are sent and how strong they are change based on wave progression. There is a fixed number of waves and these waves should be definable in a config.
 
+### Wave config
+The waves are configured per map. Each wave has:
+- A delay: the countdown to the wave, from when the previous wave started. Wave 1's delay doubles as the build-up time at the start of the game.
+- A hint describing the wave, shown to the players while counting down to it.
+- Groups of units. A wave can have several groups, and they don't have to contain the same units. Each group has:
+  - The units to send.
+  - The lane it's sent down (north or south).
+  - An optional delay within the wave.
+  - An optional starting veterancy, making the group more difficult.
+  - An optional repeat: send the group again every X seconds, Y times.
+
+Waves come on a fixed timer, so they can stack up if players fall behind. Players can call the next wave early, which restarts the countdown from then.
+
+All Red Alert units can be used in waves; there is no distinction between Allied and Soviet units. These are excluded: ships, Engineers, Spies, Thieves, Mine Layers, APCs, Chinooks, Harvesters and MCVs. Scaling with player count is ignored for now.
+
+### Enemy behaviour
+- Enemies always prioritize units over buildings.
+- Enemies don't gain veterancy while fighting across the map; groups may have veterancy from the start.
+- Air units behave like ground units: they attack any unit that crosses their path. They have unlimited ammo and never leave the map; there is always a Construction Yard to attack until the players lose.
+- Demo Trucks and M.A.D. Tanks charge in as a suicide attack.
+- Medics and Mechanics escort their group, which makes them a target for players' aircraft and artillery to snipe out.
+
+### Wave display
+The players see the current wave count and a hint of what's in the next wave (specified in the wave config), along with a button to call the next wave early. A sound plays when a wave starts, timed with the text.
+
 ## Victory
-The players win when they defeat all waves.
+The players win when the final enemy unit of the last wave dies. Every unit of every wave has to be dead.
 
 ## Defeat
 The players lose when all player Construction Yards are destroyed.
@@ -91,7 +116,7 @@ Each player starts with a Construction Yard which they can't undeploy. Building 
 - War Factory - Builds all support vehicles. Costs 1000.
 
 ## Resources
-Players start out with 4000. Ore is not gathered anymore, players get money by killing enemies and completing side objectives. Whoever did the most total damage gets 30% of the unit's cost as income when it dies (use last hit if two players have the same damage).
+Players start out with 4000. Ore is not gathered anymore, players get money by killing enemies and completing side objectives. Whoever did the most total damage gets 30% of the unit's cost as income when it dies (use last hit if two players have the same damage). Enemies that start with veterancy pay out by the same percentage.
 It's possible to send money between players as well. Power/energy is no longer used; it doesn't have to be removed but we can just set buildings to not use power.
 
 ## Map
