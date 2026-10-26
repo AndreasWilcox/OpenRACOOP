@@ -3,43 +3,110 @@
 
 The game mode is inspired by custom maps such as EnfosTD from Warcraft 3. In this new game mode players defend against continuous waves of enemy troops.
 
+## Players
+The current design is made for a minimum of 4 players but it's not a hard limit. Players can pick the same force if they want; the game won't block you from leaving forces unused. Preferably the enemy should scale with player count.
+
 ## Enemy
 
 The enemy does not have a base building feature but instead waves are continuously spawned and sent in intervals (like in tower defence).
-What units are sent and how strong they are change based on wave progression. There is a fixed number of waves and these waves should be definable in a config, after completing all the waves the players win. Players lose when the enemy waves destroy all players deployed MCVs.
+What units are sent and how strong they are change based on wave progression. There is a fixed number of waves and these waves should be definable in a config.
 
-## Players
+## Victory
+The players win when they defeat all waves.
 
-### Units
-To create more teamwork between players each player has access to a set of units they can use unique for that player. Lets call these forces, so each player selects a force in the game start UI (I'm thinking how you select a faction currently). Units no longer automatically gain veterancy, they get promoted by going to the upgrade bay (see Buildings).
+## Defeat
+The players lose when all player Construction Yards are destroyed.
+
+## Forces
+To create more teamwork between players each player has access to a set of units & powers they can use unique for that player. Lets call these forces; they replace factions so each player selects a force in the game start UI. Units no longer automatically gain veterancy, they get promoted by going to the upgrade bay (see Buildings).
+
+Units, buildings and support powers work as they do in the original game unless specified. The original game's tech tree isn't used.
 
 Handy lists of units in original game, only for reference.
 [Allied units](http://ra.afraid.org/html/ra/a_units.html)
 [Soviet units](http://ra.afraid.org/html/ra/s_units.html)
 
-### Forces
-- Infantry
-- Tanks
-- Air/anti-air
-- Artillery/support
+## Units
+Only the units in a specific force can be bought by that force. All the units a force can buy should be under the same tab; ie Infantry units uses Infantry and requires Barracks, Tanks uses Vehicles and requires War Factory, Air uses Aircraft and requires Airfield/Helipad/War Factory and Support uses Vehicles and requires War Factory. In effect, each force would only build from Buildings and their unit tab. Units only requires their force's construction building, additionally some require the Tech Center. Air has multiple construction buildings so there it is specified. Anything not listed is unavailable.
 
-### Buildings
-Each player starts with a deployed MCV which they can't undeploy. They also start with a single construction building based on what force they've selected (see above about forces). Building generally works as before but we have new buildings to use.
+### Infantry
+- Rifle Infantry
+- Rocket Soldier
+- Grenadier
+- Medic
+- Flamethrower - Requires Tech Center
 
-Upgrade bay (previously repair bay): Promotes a unit to the next level of veterancy. Each promotion costs 25% of unit cost. Promotions follow the [OpenRA veterancy](https://openra-red-alert.fandom.com/wiki/Veterancy), ie 1, 2, 3 and Elite.
+### Tanks
+- Ranger
+- Light Tank
+- Heavy Tank
+- Mammoth Tank - Requires Tech Center.
 
-### Resources
-Ore is not gathered anymore, players get money by killing enemies and completing side objectives. It should be possible to send money between players as well. Power/energy is no longer used; it doesn't have to be removed but we can just set buildings to not use power.
+### Air
+- Hind - Requires Helipad.
+- Longbow - Requires Helipad.
+- Yak - Requires Airfield.
+- MiG - Requires Airfield.
+- Mobile Flak - Requires War Factory, is visible in Aircraft tab.
+
+### Support
+- Artillery - Decrease damage by 40% compared to original game.
+- Mine Layer
+- V2 Rocket - Requires Tech Center. Decrease damage by 40% compared to original game.
+- Demo Truck - Tech Center.
+
+## Powers
+NOTE: Need ideas for fitting powers so each team has at least one.
+### Infantry
+- Paratroopers
+### Tanks
+- Flash Freeze (*new*) - Makes units in a 5x5 area slow down to 60% speed for 20 seconds. Check if OpenRA has a way to do this already.
+### Air
+### Support
+- Parabombs - Previously Ukraine's support power. Cooldown should be 4 minutes.
+- Cruiser Shelling (*new*) - Fires in a barrage of 6 Cruiser shells from offscreen hitting an area of 4x4 squares. We don't see the cruisers themselves, just the shots coming in from the left side of the map. Can be placed anywhere. 3 minute cooldown.
+
+## Buildings
+Each player starts with a Construction Yard which they can't undeploy. Building generally works as before but we have a different set of buildings to build per force. Anything not listed is unavailable. A player isn't fully out even if their Construction Yard is destroyed, they can still build from their production building and move around remaining troops. Selling a building gives back half of the cost. Repairing buildings costs money just as before.
+
+### Common buildings (all forces)
+- Upgrade Bay (use Chonosphere visual) - Requires force's construction building. Selecting the building and then clicking a unit promotes that unit to the next level of veterancy. Each promotion level costs 25% of unit cost. Promotions follow the [OpenRA veterancy](https://openra-red-alert.fandom.com/wiki/Veterancy), ie three chevron ranks plus Elite. The promotion is instant. Can only build one and the building costs 600.
+- Power Plant - now only increases all units/buildings damage by 10% for the player. Can build more than one, each one increases damage additively (ie, 3 buildings is 30% more damage). Initially costs 2000, price increases by 1000 for each building.
+- Radar Dome - now only increases all units/buildings attack range by 1 cell for the player. Costs 2500. Can also build more than one and range is increased additively (ie, 3 buildings is 3 cells extra range).
+- Tech Center - Unlocks support powers for the player (according to Powers heading). Initially costs 3000, price increases by 1500 for each building.
+- Service Depot - Repairing a unit is free. Costs 1000.
+
+### Infantry
+- Barracks (use soviet visual style) - Builds all infantry. Costs 300.
+
+### Tanks
+- War Factory - Builds all tanks. Costs 1000.
+
+### Air
+- Airfield - Builds Yak & MiG. Landing on it will repair in addition to rearming the craft. Repair should be done at same speed as Service Depot. Costs 500.
+- Helipad - Builds Hind & Longbow. Will repair as well as rearm, just as Airfield. Costs 600.
+- War Factory - Only builds Mobile Flak. Costs 400.
+
+### Support
+- War Factory - Builds all support vehicles. Costs 1000.
+
+## Resources
+Players start out with 4000. Ore is not gathered anymore, players get money by killing enemies and completing side objectives. Whoever did the most total damage gets 30% of the unit's cost as income when it dies (use last hit if two players have the same damage).
+It's possible to send money between players as well. Power/energy is no longer used; it doesn't have to be removed but we can just set buildings to not use power.
 
 ## Map
-
+The map is a long & small map, currently testing with 128x32. It's built on the idea of two lanes but with open areas between the 'lanes'. See the test map TwoLane that I've made for how I'm thinking.
+Enemies spawn at either lane and move & attack until they reach the player's base.
 
 ## Side objectives
 NOTE: Hold on with implementing this until the other stuff is done.
 During the game while defending there should occur side objectives that will give players money for completing. These objectives gives incentives for players to be more adaptable and gives risk/reward choices.
 
 ### Destroy radar vehicle
-A radar vehicle will spawn and move to one of a few defined points. Players need to destroy it within a timelimit before it leaves. They player that last hits it gets the money.
+A radar vehicle will spawn and move to one of a few defined points. Players need to destroy it within a timelimit before it leaves. Money logic is the same as with other enemy units. I think we can reuse the M.A.D. Tank for this but just disable its firing.
 
 ### Resupply drop
 A money crate will spawn somewhere towards the enemy's side. The player that touches the crate gets the money.
+
+## Other notes
+Full map will always be visible to all players.
