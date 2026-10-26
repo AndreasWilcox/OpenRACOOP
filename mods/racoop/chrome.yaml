@@ -13,3 +13,11 @@ coop-order-icons:
 		send-cash: 48, 0, 16, 16
 		send-cash-disabled: 64, 0, 16, 16
 		send-cash-active: 80, 0, 16, 16
+
+# Lobby flags of the forces, reusing Red Alert's flags.
+flags:
+	Regions:
+		infantry: 226, 193, 30, 15
+		tanks: 226, 177, 30, 15
+		air: 226, 49, 30, 15
+		support: 226, 161, 30, 15

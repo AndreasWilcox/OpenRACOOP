@@ -1,0 +1,8 @@
+# Co-op metrics, loaded after ra|metrics.yaml.
+
+Metrics:
+	# Sidebar style of each force (there are only Allied and Soviet ones)
+	FactionSuffix-infantry: soviet
+	FactionSuffix-tanks: allies
+	FactionSuffix-air: allies
+	FactionSuffix-support: soviet

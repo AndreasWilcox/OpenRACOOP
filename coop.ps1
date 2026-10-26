@@ -13,7 +13,9 @@
 #          -Timeout <seconds> (smoke/test, per run, default 90),
 #          -Scenario <name> (test: run only this scenario; default runs all of the map's scenarios),
 #          -Show (smoke/test: show the game window instead of hiding it, for debugging),
-#          -Fog (play with normal shroud and fog of war; by default the whole map is revealed for debugging)
+#          -Faction <name> (play/smoke/test: the local player's force, e.g. infantry, tanks, air or support; default random)
+#
+# Test scenarios named force-<faction> always run as that faction.
 
 param(
 	[Parameter(Position = 0)]
@@ -26,7 +28,7 @@ param(
 	[int]$Timeout = 90,
 	[string]$Scenario,
 	[switch]$Show,
-	[switch]$Fog
+	[string]$Faction
 )
 
 $ErrorActionPreference = "Stop"
@@ -59,11 +61,11 @@ function GameArgs([string[]]$extra)
 	return @("bin\OpenRA.dll", "--", "Engine.EngineDir=..", "Engine.LaunchPath=$Root\launch-game.cmd", "Game.Mod=$Mod") + $display + $extra
 }
 
-# Lobby options applied by the host: reveal the whole map unless -Fog is given.
+# Lobby options applied by the host, plus the local player's faction if -Faction is given.
 function LobbyOptions([string[]]$extra = @())
 {
 	$options = @($extra)
-	if (-not $Fog) { $options += @("explored=True", "fog=False") }
+	if ($Faction -and -not ($options -match "^faction=")) { $options += "faction=$Faction" }
 	if ($options.Count -eq 0) { return @() }
 	return @("Launch.LobbyOptions=" + ($options -join ","))
 }
@@ -215,7 +217,9 @@ function RunScenario([string]$name)
 	Write-Host "Test '$Map/$name'..." -ForegroundColor Cyan
 	$since = (Get-Date).AddSeconds(-1)
 	$started = Get-Date
-	$game = StartAutomatedGame (@("Launch.Map=$Map") + (LobbyOptions @("test=$name", "gamespeed=test")))
+	$options = @("test=$name", "gamespeed=test")
+	if ($name -match "^force-(.+)$") { $options += "faction=$($Matches[1])" }
+	$game = StartAutomatedGame (@("Launch.Map=$Map") + (LobbyOptions $options))
 
 	$result = WatchGame $game $since {
 		param($lua)

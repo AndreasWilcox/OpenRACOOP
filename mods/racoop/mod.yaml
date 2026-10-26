@@ -92,6 +92,7 @@ Rules:
 	ra|rules/fakes.yaml
 	ra|rules/map-generators.yaml
 	racoop|rules/coop.yaml
+	racoop|rules/forces.yaml
 
 Sequences:
 	ra|sequences/ships.yaml
@@ -200,6 +201,7 @@ Weapons:
 
 Voices:
 	ra|audio/voices.yaml
+	racoop|audio/voices.yaml
 
 Notifications:
 	ra|audio/notifications.yaml
@@ -232,6 +234,7 @@ ServerTraits:
 ChromeMetrics:
 	common|metrics.yaml
 	ra|metrics.yaml
+	racoop|metrics.yaml
 
 Fonts:
 	Tiny:

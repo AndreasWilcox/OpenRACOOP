@@ -9,6 +9,9 @@
  */
 #endregion
 
+using System;
+using System.Linq;
+using OpenRA.Mods.Common.Traits;
 using OpenRA.Scripting;
 
 namespace OpenRA.Mods.Common.Scripting
@@ -25,6 +28,24 @@ namespace OpenRA.Mods.Common.Scripting
 		public void Screenshot(string name)
 		{
 			Game.TakeScreenshot(name);
+		}
+
+		[Desc("Whether the cell is currently visible to the player (not under shroud or fog).")]
+		public bool CellVisible(Player player, CPos cell)
+		{
+			return player.Shroud.IsVisible(cell);
+		}
+
+		[Desc("The actor types the player can build right now in any of their production queues, sorted by name.")]
+		public string[] BuildableItems(Player player)
+		{
+			return player.PlayerActor.TraitsImplementing<ProductionQueue>()
+				.Concat(player.World.ActorsWithTrait<ProductionQueue>().Where(a => a.Actor.Owner == player).Select(a => a.Trait))
+				.SelectMany(q => q.BuildableItems())
+				.Select(a => a.Name)
+				.Distinct()
+				.Order(StringComparer.Ordinal)
+				.ToArray();
 		}
 	}
 }

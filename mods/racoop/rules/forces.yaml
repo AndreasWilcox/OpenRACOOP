@@ -1,0 +1,554 @@
+# Player forces: Infantry, Tanks, Air and Support (see GameModeDesignDoc.md).
+# Forces replace Red Alert's factions. Each force builds only its own production buildings and units,
+# plus the common buildings. RA's tech tree isn't used: everything not enabled here can't be built.
+#
+# The Construction Yard provides these prerequisites:
+#   force                any force: the common buildings
+#   force.<name>         the force's own buildings and units
+#   force.vehicles       Tanks and Support, which share the War Factory
+
+World:
+	# The original factions stay, but can't be picked: the Enemy, Neutral and shellmap players use them.
+	Faction@england:
+		Selectable: False
+	Faction@france:
+		Selectable: False
+	Faction@germany:
+		Selectable: False
+	Faction@russia:
+		Selectable: False
+	Faction@ukraine:
+		Selectable: False
+	Faction@randomallies:
+		Selectable: False
+	Faction@randomsoviet:
+		Selectable: False
+	Faction@random:
+		RandomFactionMembers: infantry, tanks, air, support
+		Description: faction-random-force.description
+	Faction@infantry:
+		Name: faction-infantry.name
+		InternalName: infantry
+		Side: Forces
+		Description: faction-infantry.description
+	Faction@tanks:
+		Name: faction-tanks.name
+		InternalName: tanks
+		Side: Forces
+		Description: faction-tanks.description
+	Faction@air:
+		Name: faction-air.name
+		InternalName: air
+		Side: Forces
+		Description: faction-air.description
+	Faction@support:
+		Name: faction-support.name
+		InternalName: support
+		Side: Forces
+		Description: faction-support.description
+	# Every force starts with a deployed Construction Yard
+	StartingUnits@forces:
+		Class: none
+		ClassName: options-starting-units-forces
+		Factions: infantry, tanks, air, support
+		BaseActor: fact
+	SpawnStartingUnits:
+		DropdownLocked: True
+
+Player:
+	PlayerResources:
+		DefaultCash: 4000
+	# The whole map is always visible to everyone
+	Shroud:
+		FogCheckboxEnabled: False
+		FogCheckboxLocked: True
+		ExploredMapCheckboxEnabled: True
+		ExploredMapCheckboxLocked: True
+	# Construction Yards can't be packed up into an MCV
+	LobbyPrerequisiteCheckbox@GLOBALFACTUNDEPLOY:
+		Enabled: False
+		Locked: True
+
+# Buildings don't use or make power (Power Plants are a damage upgrade instead, to come), so it's removed
+# from every building players can have. That also hides it from the build menu tooltips.
+FACT:
+	-Power:
+	ProvidesPrerequisite@force:
+		Factions: infantry, tanks, air, support
+		Prerequisite: force
+	ProvidesPrerequisite@infantry:
+		Factions: infantry
+		Prerequisite: force.infantry
+	ProvidesPrerequisite@tanks:
+		Factions: tanks
+		Prerequisite: force.tanks
+	ProvidesPrerequisite@air:
+		Factions: air
+		Prerequisite: force.air
+	ProvidesPrerequisite@support:
+		Factions: support
+		Prerequisite: force.support
+	ProvidesPrerequisite@vehicles:
+		Factions: tanks, support
+		Prerequisite: force.vehicles
+
+## Common buildings
+
+POWR:
+	-Power:
+	-ScalePowerWithHealth:
+	Buildable:
+		Prerequisites: ~force
+	Valued:
+		Cost: 2000
+
+DOME:
+	-Power:
+	Buildable:
+		Prerequisites: ~force
+	Valued:
+		Cost: 2500
+
+ATEK:
+	-Power:
+	Buildable:
+		Prerequisites: ~force
+	Valued:
+		Cost: 3000
+	# Tech Center support powers come with the forces' powers
+	-GpsPower:
+	-SupportPowerChargeBar:
+	-InfiltrateForSupportPowerReset:
+
+FIX:
+	-Power:
+	Buildable:
+		Prerequisites: ~force
+	Valued:
+		Cost: 1000
+	RepairsUnits:
+		ValuePercentage: 0
+
+## Infantry
+
+BARR:
+	-Power:
+	Buildable:
+		Prerequisites: ~force.infantry
+	Valued:
+		Cost: 300
+
+E1:
+	Buildable:
+		Prerequisites: ~barr
+
+E2:
+	Buildable:
+		Prerequisites: ~barr
+
+E3:
+	Buildable:
+		Prerequisites: ~barr
+
+MEDI:
+	Buildable:
+		Prerequisites: ~barr
+
+E4:
+	Buildable:
+		Prerequisites: ~barr, techcenter
+
+## Tanks and Support share the War Factory, so their units also need the force
+
+WEAP:
+	-Power:
+	Buildable:
+		Prerequisites: ~force.vehicles
+	Valued:
+		Cost: 1000
+
+JEEP:
+	Buildable:
+		Prerequisites: ~weap, ~force.tanks
+
+1TNK:
+	Buildable:
+		Prerequisites: ~weap, ~force.tanks
+
+3TNK:
+	Buildable:
+		Prerequisites: ~weap, ~force.tanks
+
+4TNK:
+	Buildable:
+		Prerequisites: ~weap, ~force.tanks, techcenter
+
+ARTY:
+	Inherits@FORCES: ^PlayerArtilleryNerf
+	Buildable:
+		Prerequisites: ~weap, ~force.support
+
+MNLY:
+	Buildable:
+		Prerequisites: ~weap, ~force.support
+
+V2RL:
+	Inherits@FORCES: ^PlayerArtilleryNerf
+	Buildable:
+		Prerequisites: ~weap, ~force.support, techcenter
+
+DTRK:
+	Buildable:
+		Prerequisites: ~weap, ~force.support, techcenter
+
+# Players' Artillery and V2s do 40% less damage. Enemy waves (granted wave-unit by the wave script) do full damage.
+^PlayerArtilleryNerf:
+	ExternalCondition@WAVE:
+		Condition: wave-unit
+	FirepowerMultiplier@FORCES:
+		RequiresCondition: !wave-unit
+		Modifier: 60
+
+## Air
+
+AFLD:
+	-Power:
+	Buildable:
+		Prerequisites: ~force.air
+	Valued:
+		Cost: 500
+	# Paratroopers and parabombs belong to other forces' powers (to come)
+	-AirstrikePower@spyplane:
+	-ParatroopersPower@paratroopers:
+	-AirstrikePower@parabombs:
+	-SupportPowerChargeBar:
+	RepairsUnits:
+		ValuePercentage: 0
+		HpPerStep: 1000
+		Interval: 7
+		StartRepairingNotification: Repairing
+		StartRepairingTextNotification: notification-repairing
+		FinishRepairingNotification: UnitRepaired
+		FinishRepairingTextNotification: notification-unit-repaired
+
+HPAD:
+	-Power:
+	Buildable:
+		Prerequisites: ~force.air
+	Valued:
+		Cost: 600
+	RepairsUnits:
+		ValuePercentage: 0
+		HpPerStep: 1000
+		Interval: 7
+		StartRepairingNotification: Repairing
+		StartRepairingTextNotification: notification-repairing
+		FinishRepairingNotification: UnitRepaired
+		FinishRepairingTextNotification: notification-unit-repaired
+
+# The Air force's War Factory only builds Mobile Flak, which is listed in the Aircraft tab
+WEAP.AIR:
+	Inherits: WEAP
+	RenderSprites:
+		Image: weap
+	Buildable:
+		Prerequisites: ~force.air
+		BuildPaletteOrder: 81
+	Valued:
+		Cost: 400
+	Production:
+		Produces: Aircraft, Flak
+	RallyPoint:
+		ForceSetType: Aircraft
+	ProductionBar:
+		ProductionType: Aircraft
+
+FTRK:
+	Buildable:
+		Queue: Aircraft
+		BuildAtProductionType: Flak
+		Prerequisites: ~weap.air
+
+HIND:
+	Inherits@REPAIR: ^AirForceRepair
+	Buildable:
+		Prerequisites: ~hpad
+
+HELI:
+	Inherits@REPAIR: ^AirForceRepair
+	Buildable:
+		Prerequisites: ~hpad
+
+YAK:
+	Inherits@REPAIR: ^AirForceRepair
+	Buildable:
+		Prerequisites: ~afld
+
+MIG:
+	Inherits@REPAIR: ^AirForceRepair
+	Buildable:
+		Prerequisites: ~afld, techcenter
+
+# Aircraft are repaired, as well as rearmed, when landing on their Airfield or Helipad
+^AirForceRepair:
+	Repairable:
+		RepairActors: afld, hpad
+
+## Everything else from Red Alert can't be built
+
+# Set on each actor: its own Buildable would override one inherited from a template.
+DOG:
+	Buildable:
+		Prerequisites: ~disabled
+
+E6:
+	Buildable:
+		Prerequisites: ~disabled
+
+SPY:
+	Buildable:
+		Prerequisites: ~disabled
+
+SPY.England:
+	Buildable:
+		Prerequisites: ~disabled
+
+E7:
+	Buildable:
+		Prerequisites: ~disabled
+
+MECH:
+	Buildable:
+		Prerequisites: ~disabled
+
+THF:
+	Buildable:
+		Prerequisites: ~disabled
+
+SHOK:
+	Buildable:
+		Prerequisites: ~disabled
+
+Zombie:
+	Buildable:
+		Prerequisites: ~disabled
+
+Ant:
+	Buildable:
+		Prerequisites: ~disabled
+
+2TNK:
+	Buildable:
+		Prerequisites: ~disabled
+
+HARV:
+	Buildable:
+		Prerequisites: ~disabled
+
+MCV:
+	Buildable:
+		Prerequisites: ~disabled
+
+APC:
+	Buildable:
+		Prerequisites: ~disabled
+
+TRUK:
+	Buildable:
+		Prerequisites: ~disabled
+
+MGG:
+	Buildable:
+		Prerequisites: ~disabled
+
+MRJ:
+	Buildable:
+		Prerequisites: ~disabled
+
+TTNK:
+	Buildable:
+		Prerequisites: ~disabled
+
+CTNK:
+	Buildable:
+		Prerequisites: ~disabled
+
+QTNK:
+	Buildable:
+		Prerequisites: ~disabled
+
+STNK:
+	Buildable:
+		Prerequisites: ~disabled
+
+TRAN:
+	Buildable:
+		Prerequisites: ~disabled
+
+MH60:
+	Buildable:
+		Prerequisites: ~disabled
+
+SS:
+	Buildable:
+		Prerequisites: ~disabled
+
+MSUB:
+	Buildable:
+		Prerequisites: ~disabled
+
+DD:
+	Buildable:
+		Prerequisites: ~disabled
+
+CA:
+	Buildable:
+		Prerequisites: ~disabled
+
+LST:
+	Buildable:
+		Prerequisites: ~disabled
+
+PT:
+	Buildable:
+		Prerequisites: ~disabled
+
+MSLO:
+	Buildable:
+		Prerequisites: ~disabled
+
+GAP:
+	Buildable:
+		Prerequisites: ~disabled
+
+SPEN:
+	Buildable:
+		Prerequisites: ~disabled
+
+SYRD:
+	Buildable:
+		Prerequisites: ~disabled
+
+IRON:
+	Buildable:
+		Prerequisites: ~disabled
+
+PDOX:
+	Buildable:
+		Prerequisites: ~disabled
+
+TSLA:
+	Buildable:
+		Prerequisites: ~disabled
+
+AGUN:
+	Buildable:
+		Prerequisites: ~disabled
+
+PBOX:
+	Buildable:
+		Prerequisites: ~disabled
+
+HBOX:
+	Buildable:
+		Prerequisites: ~disabled
+
+GUN:
+	Buildable:
+		Prerequisites: ~disabled
+
+FTUR:
+	Buildable:
+		Prerequisites: ~disabled
+
+SAM:
+	Buildable:
+		Prerequisites: ~disabled
+
+STEK:
+	Buildable:
+		Prerequisites: ~disabled
+
+PROC:
+	Buildable:
+		Prerequisites: ~disabled
+
+SILO:
+	Buildable:
+		Prerequisites: ~disabled
+
+AFLD.Ukraine:
+	Buildable:
+		Prerequisites: ~disabled
+
+APWR:
+	Buildable:
+		Prerequisites: ~disabled
+
+KENN:
+	Buildable:
+		Prerequisites: ~disabled
+
+TENT:
+	Buildable:
+		Prerequisites: ~disabled
+
+SBAG:
+	Buildable:
+		Prerequisites: ~disabled
+
+FENC:
+	Buildable:
+		Prerequisites: ~disabled
+
+BRIK:
+	Buildable:
+		Prerequisites: ~disabled
+
+FPWR:
+	Buildable:
+		Prerequisites: ~disabled
+
+TENF:
+	Buildable:
+		Prerequisites: ~disabled
+
+SYRF:
+	Buildable:
+		Prerequisites: ~disabled
+
+SPEF:
+	Buildable:
+		Prerequisites: ~disabled
+
+WEAF:
+	Buildable:
+		Prerequisites: ~disabled
+
+DOMF:
+	Buildable:
+		Prerequisites: ~disabled
+
+FIXF:
+	Buildable:
+		Prerequisites: ~disabled
+
+FAPW:
+	Buildable:
+		Prerequisites: ~disabled
+
+ATEF:
+	Buildable:
+		Prerequisites: ~disabled
+
+PDOF:
+	Buildable:
+		Prerequisites: ~disabled
+
+MSLF:
+	Buildable:
+		Prerequisites: ~disabled
+
+FACF:
+	Buildable:
+		Prerequisites: ~disabled

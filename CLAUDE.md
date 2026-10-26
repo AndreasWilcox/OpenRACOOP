@@ -64,6 +64,11 @@ Running PowerShell with `2>&1` on `coop.ps1` breaks the build: `dotnet` writes t
   - `maps/two-lane` is the main map. Up to 4 allied humans (Multi0–3) build in the west and face a non-combatant `Enemy` with no AI, base or starting units. Waves come from the east down a north and a south lane, along named `waypoint` actors (`NorthSpawn`, `NorthEastGap`, `NorthWestGap`, and the same for South).
   - `maps/coop-01` is the older test map, with its own simple fixed-interval script.
   - Slots nobody joined aren't created, so human players may be nil.
+- **Forces:**
+  - `rules/forces.yaml` replaces RA's factions with the four forces (`infantry`, `tanks`, `air`, `support`). The old factions stay non-selectable for the Enemy, Neutral and shellmap players.
+  - The Construction Yard provides `force`, `force.<name>` and `force.vehicles` prerequisites. Each force builds only its own buildings and units; every other buildable RA actor gets `~disabled`. Set it on the actor itself: a `Buildable` inherited from a template is overridden by the actor's own.
+  - Each force's sidebar look, voices and lobby flag map to the Allied or Soviet versions, in `metrics.yaml`, `audio/voices.yaml` and the `flags` regions in `chrome.yaml`.
+  - The Air force's War Factory is a separate actor, `weap.air`, so it can cost less and build Mobile Flak in the Aircraft tab.
 - **Waves:**
   - A map defines its waves as `WaveConfig` in `waves.lua`, which documents the format. `scripts/coopwaves.lua` runs them with `CoopWaves.Start(config, lanes, humans, enemy)`. It validates the config on load, spawns groups, makes enemies prefer units over buildings, and decides victory (every wave unit dead) and defeat (no human Construction Yard or MCV left).
   - `rules/coop.yaml` removes `ConquestVictoryConditions`, because its objective can't complete against a non-combatant enemy.
@@ -77,14 +82,16 @@ Running PowerShell with `2>&1` on `coop.ps1` breaks the build: `dotnet` writes t
   - `smoke`: fail on Lua errors or crashes.
   - `test`: run the scenarios.
   - `lint`, and `check` (lint + smoke + all tests).
-  - Options: `-Map <folder>` (default coop-01), `-Scenario <name>`, `-NoBuild`, `-Show` (show the window for smoke/test), `-Fog` (dev launches reveal the whole map by default).
+  - Options: `-Map <folder>` (default coop-01), `-Scenario <name>`, `-NoBuild`, `-Show` (show the window for smoke/test), `-Faction <force>` (default random).
+  - Test scenarios named `force-<faction>` always run as that faction.
   - `smoke`, `test` and `check` run in a hidden window.
 - **Automated tests:** each scenario is a Lua function in `<map>-tests.lua` (`Scenarios["name"] = function() ... end`) using the `CoopTest.*` helpers from `scripts/cooptest.lua`. List each scenario in the map's hidden `ScriptLobbyDropdown@test`, and call `CoopTest.Run(Scenarios)` from `WorldLoaded`. On two-lane it runs before `CoopWaves.Start`, so a scenario can swap in its own `WaveConfig`. Results are written as `coop-test:` lines to lua.log, and screenshots go to `test-results/` (gitignored).
   - `check` only covers coop-01. Run `.\coop test -Map two-lane` as well.
   - Close any running game first: an open game holds `lua.log`, so test runs log to `lua.log.1` and time out.
   - The test speed is about 8× normal, so on-screen countdowns, which are in real time like the game clock, read shorter.
 - **Engine additions for this:**
-  - `Launch.LobbyOptions=id=value,...`, applied with `Launch.Map` or when joining a server as its admin.
+  - `Launch.LobbyOptions=id=value,...`, applied with `Launch.Map` or when joining a server as its admin. `faction=<name>` sets the local player's faction.
+  - The Lua function `Test.BuildableItems(player)`, which lists what the player can currently build.
   - Environment variables `OPENRA_HIDDEN_WINDOW=1` and `OPENRA_SCREENSHOT_DIR`.
   - The Lua global `Test.Screenshot(name)` (`OpenRA.Mods.Common/Scripting/Global/TestGlobal.cs`).
   - `actor.Detonate(target)` for MAD tanks (`OpenRA.Mods.Cnc/Scripting/Properties/MadTankProperties.cs`). To allow it, `MadTank` and `MadTankInfo` are now public.

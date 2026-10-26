@@ -662,8 +662,10 @@ Container@PLAYER_WIDGETS:
 							Y: 4
 							ImageCollection: cash-icons
 							ImageName: cash-normal
+				# Co-op: power isn't used, so the power counter is hidden.
 				LabelWithTooltip@POWER:
 					Logic: IngamePowerCounterLogic
+					Visible: false
 					X: PARENT_WIDTH - WIDTH - 30
 					Y: 2
 					Width: 50

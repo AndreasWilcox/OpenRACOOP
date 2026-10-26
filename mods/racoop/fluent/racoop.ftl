@@ -25,3 +25,30 @@ label-wave-status-final = Wave { $wave } / { $total }
 label-wave-status-hint = Next: { $hint }
 button-call-next-wave = Call next wave
 notification-wave-called = { $player } called the next wave.
+
+## Forces
+faction-infantry =
+    .name = Infantry
+    .description = Infantry: Barracks
+     Rifle Infantry, Rocket Soldiers, Grenadiers, Medics and Flamethrowers.
+
+faction-tanks =
+    .name = Tanks
+    .description = Tanks: War Factory
+     Rangers, Light, Heavy and Mammoth Tanks.
+
+faction-air =
+    .name = Air
+    .description = Air: Airfield, Helipad and War Factory
+     Hinds, Longbows, Yaks, MiGs and Mobile Flak.
+
+faction-support =
+    .name = Support
+    .description = Support: War Factory
+     Artillery, Mine Layers, V2 Rockets and Demolition Trucks.
+
+faction-random-force =
+    .description = Random Force
+     A random force will be chosen when the game starts.
+
+options-starting-units-forces = Construction Yard

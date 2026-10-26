@@ -1010,7 +1010,10 @@ namespace OpenRA
 			benchmark = new Benchmark(prefix);
 		}
 
-		static IEnumerable<Order> LobbyOptionOrders(string lobbyOptions)
+		/// <summary>
+		/// Lobby orders for a list of id=value lobby options. The special id `faction` sets the faction of the given client.
+		/// </summary>
+		static IEnumerable<Order> LobbyOptionOrders(string lobbyOptions, int clientIndex)
 		{
 			if (string.IsNullOrEmpty(lobbyOptions))
 				yield break;
@@ -1018,27 +1021,29 @@ namespace OpenRA
 			foreach (var option in lobbyOptions.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
 			{
 				var kv = option.Split('=', 2, StringSplitOptions.TrimEntries);
-				if (kv.Length == 2)
-					yield return Order.Command($"option {kv[0]} {kv[1]}");
-				else
+				if (kv.Length != 2)
 					Log.Write("client", $"Ignoring malformed lobby option `{option}`, expected id=value.");
+				else if (kv[0] == "faction")
+					yield return Order.Command($"faction {clientIndex} {kv[1]}");
+				else
+					yield return Order.Command($"option {kv[0]} {kv[1]}");
 			}
 		}
 
 		/// <summary>Sets the given lobby options as soon as the local client is the admin of the lobby.</summary>
 		public static void SetLobbyOptionsWhenAdmin(string lobbyOptions)
 		{
-			var orders = LobbyOptionOrders(lobbyOptions).ToList();
-			if (orders.Count == 0)
+			if (string.IsNullOrEmpty(lobbyOptions))
 				return;
 
 			void SetOptions()
 			{
-				if (OrderManager?.LocalClient?.IsAdmin != true)
+				var localClient = OrderManager?.LocalClient;
+				if (localClient?.IsAdmin != true)
 					return;
 
 				LobbyInfoChanged -= SetOptions;
-				foreach (var o in orders)
+				foreach (var o in LobbyOptionOrders(lobbyOptions, localClient.Index))
 					OrderManager.IssueOrder(o);
 			}
 
@@ -1048,7 +1053,9 @@ namespace OpenRA
 		public static void LoadMap(string launchMap, string lobbyOptions = null)
 		{
 			var orders = new List<Order> { Order.Command("option gamespeed default") };
-			orders.AddRange(LobbyOptionOrders(lobbyOptions));
+
+			// The local client is the first (and only) client of the local server
+			orders.AddRange(LobbyOptionOrders(lobbyOptions, 0));
 			orders.Add(Order.Command($"state {Session.ClientState.Ready}"));
 
 			var map = ModData.MapCache.SingleOrDefault(m => m.Uid == launchMap || Path.GetFileName(m.Path) == launchMap);

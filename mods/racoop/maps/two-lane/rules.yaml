@@ -11,5 +11,9 @@ World:
 			air: twolane-test-air
 			victory: twolane-test-victory
 			call-early: twolane-test-call-early
+			force-infantry: twolane-test-force-infantry
+			force-tanks: twolane-test-force-tanks
+			force-air: twolane-test-force-air
+			force-support: twolane-test-force-support
 		Default: none
 		Visible: False

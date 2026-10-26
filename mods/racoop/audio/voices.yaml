@@ -1,0 +1,15 @@
+# Unit voices of each force, added to ra|audio/voices.yaml (there are only Allied and Soviet ones).
+
+GenericVoice:
+	Variants:
+		infantry: .r01,.r03
+		tanks: .v01,.v03
+		air: .v01,.v03
+		support: .r01,.r03
+
+VehicleVoice:
+	Variants:
+		infantry: .r00,.r02
+		tanks: .v00,.v02
+		air: .v00,.v02
+		support: .r00,.r02

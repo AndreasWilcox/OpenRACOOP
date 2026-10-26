@@ -25,3 +25,7 @@ twolane-test-waves = Waves
 twolane-test-air = Air
 twolane-test-victory = Victory
 twolane-test-call-early = Call early
+twolane-test-force-infantry = Infantry force
+twolane-test-force-tanks = Tanks force
+twolane-test-force-air = Air force
+twolane-test-force-support = Support force
