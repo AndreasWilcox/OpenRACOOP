@@ -485,11 +485,12 @@ namespace OpenRA.Mods.Common.Traits
 							return;
 					}
 
-					var cost = GetProductionCost(unit);
-					var time = GetBuildTime(unit, bi);
 					var amountToBuild = Math.Min(fromLimit, order.ExtraData);
 					for (var n = 0; n < amountToBuild; n++)
 					{
+						// Evaluated for each item, as cost modifiers may depend on what is already queued
+						var cost = GetProductionCost(unit);
+						var time = GetBuildTime(unit, bi);
 						if (Info.PayUpFront && cost > playerResources.GetCashAndResources())
 							return;
 
@@ -690,15 +691,16 @@ namespace OpenRA.Mods.Common.Traits
 				return false;
 			}
 
+			var item = Queue.First(i => i.Done && i.Item == unit.Name);
 			var inits = new TypeDictionary
 			{
 				new OwnerInit(Actor.Owner),
-				new FactionInit(BuildableInfo.GetInitialFaction(unit, Faction))
+				new FactionInit(BuildableInfo.GetInitialFaction(unit, Faction)),
+				new PurchasePriceInit(item.TotalCost)
 			};
 
 			var bi = unit.TraitInfo<BuildableInfo>();
 			var type = developerMode.AllTech ? Info.Type : (bi.BuildAtProductionType ?? Info.Type);
-			var item = Queue.First(i => i.Done && i.Item == unit.Name);
 			if (!mostLikelyProducerTrait.IsTraitPaused && mostLikelyProducerTrait.Produce(Actor, unit, type, inits, item.TotalCost))
 			{
 				EndProduction(item);

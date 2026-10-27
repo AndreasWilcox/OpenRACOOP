@@ -69,6 +69,16 @@ Running PowerShell with `2>&1` on `coop.ps1` breaks the build: `dotnet` writes t
   - The Construction Yard provides `force`, `force.<name>` and `force.vehicles` prerequisites. Each force builds only its own buildings and units; every other buildable RA actor gets `~disabled`. Set it on the actor itself: a `Buildable` inherited from a template is overridden by the actor's own.
   - Each force's sidebar look, voices and lobby flag map to the Allied or Soviet versions, in `metrics.yaml`, `audio/voices.yaml` and the `flags` regions in `chrome.yaml`.
   - The Air force's War Factory is a separate actor, `weap.air`, so it can cost less and build Mobile Flak in the Aircraft tab.
+- **Other features, one rules file each** (plus a matching `twolane-tests-<feature>.lua`):
+  - `upgradebay.yaml`: the Upgrade Bay (`upgr`). The `PromotesUnits` trait handles "select the bay, click a unit"; Lua uses `bay.Promote(unit)`.
+  - `buffs.yaml`: each finished Power Plant or Radar Dome gives the owner's units and buildings +10% damage or range.
+    - Their price is 2000 + 1000 for each one owned or queued.
+    - A building refunds half of what it was bought for: `PurchasePriceSellValue` records the price at placement, and `GetSellValue()` uses it.
+    - This is built on `OwnedActorCounter`, `CountedOwnedActor` and the `*PerOwnedActor` traits.
+  - `powers.yaml`: Tech Center powers, gated by `force.<name>`.
+    - Infantry: Paratroopers. Tanks: Flash Freeze. Support: Parabombs and Cruiser Shelling (`ProjectileBarragePower`). Air has none yet.
+    - Each power has its own `OrderName`, because powers are keyed by it.
+  - `income.yaml`: `GivesDamageShareBounty` pays 30% of a killed unit's value, including its rank, to the player who did the most damage. RA's kill bounty option is locked off.
 - **Waves:**
   - A map defines its waves as `WaveConfig` in `waves.lua`, which documents the format. `scripts/coopwaves.lua` runs them with `CoopWaves.Start(config, lanes, humans, enemy)`. It validates the config on load, spawns groups, makes enemies prefer units over buildings, and decides victory (every wave unit dead) and defeat (no human Construction Yard or MCV left).
   - `rules/coop.yaml` removes `ConquestVictoryConditions`, because its objective can't complete against a non-combatant enemy.
@@ -83,7 +93,7 @@ Running PowerShell with `2>&1` on `coop.ps1` breaks the build: `dotnet` writes t
   - `test`: run the scenarios.
   - `lint`, and `check` (lint + smoke + all tests).
   - Options: `-Map <folder>` (default coop-01), `-Scenario <name>`, `-NoBuild`, `-Show` (show the window for smoke/test), `-Faction <force>` (default random).
-  - Test scenarios named `force-<faction>` always run as that faction.
+  - Test scenarios named `force-<faction>` or `powers-<faction>` always run as that faction.
   - `smoke`, `test` and `check` run in a hidden window.
 - **Automated tests:** each scenario is a Lua function in `<map>-tests.lua` (`Scenarios["name"] = function() ... end`) using the `CoopTest.*` helpers from `scripts/cooptest.lua`. List each scenario in the map's hidden `ScriptLobbyDropdown@test`, and call `CoopTest.Run(Scenarios)` from `WorldLoaded`. On two-lane it runs before `CoopWaves.Start`, so a scenario can swap in its own `WaveConfig`. Results are written as `coop-test:` lines to lua.log, and screenshots go to `test-results/` (gitignored).
   - `check` only covers coop-01. Run `.\coop test -Map two-lane` as well.
@@ -91,7 +101,10 @@ Running PowerShell with `2>&1` on `coop.ps1` breaks the build: `dotnet` writes t
   - The test speed is about 8× normal, so on-screen countdowns, which are in real time like the game clock, read shorter.
 - **Engine additions for this:**
   - `Launch.LobbyOptions=id=value,...`, applied with `Launch.Map` or when joining a server as its admin. `faction=<name>` sets the local player's faction.
-  - The Lua function `Test.BuildableItems(player)`, which lists what the player can currently build.
+  - Test-only Lua helpers on the `Test` global, such as `BuildableItems`, `CellVisible`, `ProductionCost`, `PlaceBuilding`, `FirepowerModifier`, `SupportPowers`, `ActivateSupportPower` and `Damage`. They're listed in `TestGlobal.cs`.
+  - In Lua tests:
+    - Actors created with `Actor.Create` join the world at the end of the tick, so wait a tick before checking anything that depends on them.
+    - Lua returns a new wrapper object for the same actor each time, so key tables by `tostring(actor)`, not by the actor.
   - Environment variables `OPENRA_HIDDEN_WINDOW=1` and `OPENRA_SCREENSHOT_DIR`.
   - The Lua global `Test.Screenshot(name)` (`OpenRA.Mods.Common/Scripting/Global/TestGlobal.cs`).
   - `actor.Detonate(target)` for MAD tanks (`OpenRA.Mods.Cnc/Scripting/Properties/MadTankProperties.cs`). To allow it, `MadTank` and `MadTankInfo` are now public.

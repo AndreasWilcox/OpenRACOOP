@@ -26,10 +26,22 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		public static int GetSellValue(this Actor a)
 		{
-			var csv = a.Info.TraitInfoOrDefault<CustomSellValueInfo>();
+			if (a.Info.HasTraitInfo<PurchasePriceSellValueInfo>())
+			{
+				var purchasePrice = a.TraitOrDefault<PurchasePriceSellValue>();
+				if (purchasePrice != null)
+					return purchasePrice.Value;
+			}
+
+			return a.Info.GetSellValue();
+		}
+
+		public static int GetSellValue(this ActorInfo a)
+		{
+			var csv = a.TraitInfoOrDefault<CustomSellValueInfo>();
 			if (csv != null) return csv.Value;
 
-			var valued = a.Info.TraitInfoOrDefault<ValuedInfo>();
+			var valued = a.TraitInfoOrDefault<ValuedInfo>();
 			if (valued != null) return valued.Cost;
 
 			return 0;

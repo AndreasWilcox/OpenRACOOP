@@ -201,7 +201,7 @@ end
 
 -- What each force can build (see racoop|rules/forces.yaml), sorted by name.
 -- Tech Center units are listed separately: they can only be built once there is a Tech Center.
-local CommonBuildings = { "atek", "dome", "fix", "powr" }
+local CommonBuildings = { "atek", "dome", "fix", "powr", "upgr" }
 local Forces =
 {
 	infantry = { Buildings = { "barr" }, Units = { "e1", "e2", "e3", "medi" }, TechUnits = { "e4" } },

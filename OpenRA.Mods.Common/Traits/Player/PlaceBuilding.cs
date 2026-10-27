@@ -125,7 +125,8 @@ namespace OpenRA.Mods.Common.Traits
 						new LocationInit(targetLocation),
 						new OwnerInit(order.Player),
 						new FactionInit(faction),
-						new PlaceBuildingInit()
+						new PlaceBuildingInit(),
+						new PurchasePriceInit(item.TotalCost)
 					]);
 
 					foreach (var s in buildingInfo.BuildSounds)
@@ -210,7 +211,8 @@ namespace OpenRA.Mods.Common.Traits
 						new LocationInit(targetLocation),
 						new OwnerInit(order.Player),
 						new FactionInit(faction),
-						new PlaceBuildingInit()
+						new PlaceBuildingInit(),
+						new PurchasePriceInit(item.TotalCost)
 					]);
 
 					foreach (var s in buildingInfo.BuildSounds)

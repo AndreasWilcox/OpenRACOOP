@@ -69,7 +69,7 @@ Player:
 		Enabled: False
 		Locked: True
 
-# Buildings don't use or make power (Power Plants are a damage upgrade instead, to come), so it's removed
+# Buildings don't use or make power (Power Plants are a damage upgrade instead, see buffs.yaml), so it's removed
 # from every building players can have. That also hides it from the build menu tooltips.
 FACT:
 	-Power:
@@ -115,7 +115,7 @@ ATEK:
 		Prerequisites: ~force
 	Valued:
 		Cost: 3000
-	# Tech Center support powers come with the forces' powers
+	# RA's GPS power is removed: the forces' own powers are added to the Tech Center in powers.yaml
 	-GpsPower:
 	-SupportPowerChargeBar:
 	-InfiltrateForSupportPowerReset:
@@ -217,7 +217,7 @@ AFLD:
 		Prerequisites: ~force.air
 	Valued:
 		Cost: 500
-	# Paratroopers and parabombs belong to other forces' powers (to come)
+	# Paratroopers and parabombs are Tech Center powers of other forces instead (see powers.yaml)
 	-AirstrikePower@spyplane:
 	-ParatroopersPower@paratroopers:
 	-AirstrikePower@parabombs:

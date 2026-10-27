@@ -15,7 +15,7 @@
 #          -Show (smoke/test: show the game window instead of hiding it, for debugging),
 #          -Faction <name> (play/smoke/test: the local player's force, e.g. infantry, tanks, air or support; default random)
 #
-# Test scenarios named force-<faction> always run as that faction.
+# Test scenarios named force-<faction> or powers-<faction> always run as that faction.
 
 param(
 	[Parameter(Position = 0)]
@@ -167,7 +167,8 @@ function Lint
 function Smoke
 {
 	Write-Host "Smoke testing map '$Map' (timeout ${Timeout}s)..." -ForegroundColor Cyan
-	$since = (Get-Date).AddSeconds(-1)
+	# Only logs written after this run starts count: a game stopped just before may have written lua.log moments ago
+	$since = Get-Date
 	$game = StartAutomatedGame (@("Launch.Map=$Map") + (LobbyOptions))
 
 	# Let the game tick for a while after the script started, to catch early runtime errors.
@@ -215,10 +216,11 @@ function MapScenarios
 function RunScenario([string]$name)
 {
 	Write-Host "Test '$Map/$name'..." -ForegroundColor Cyan
-	$since = (Get-Date).AddSeconds(-1)
+	# Only logs written after this run starts count: a game stopped just before may have written lua.log moments ago
+	$since = Get-Date
 	$started = Get-Date
 	$options = @("test=$name", "gamespeed=test")
-	if ($name -match "^force-(.+)$") { $options += "faction=$($Matches[1])" }
+	if ($name -match "^(force|powers)-(.+)$") { $options += "faction=$($Matches[2])" }
 	$game = StartAutomatedGame (@("Launch.Map=$Map") + (LobbyOptions $options))
 
 	$result = WatchGame $game $since {

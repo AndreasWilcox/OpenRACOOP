@@ -1,0 +1,52 @@
+# Power Plant and Radar Dome bonuses (see GameModeDesignDoc.md, "Common buildings"):
+# each completed Power Plant a player owns gives all their units and buildings +10% damage,
+# and each completed Radar Dome +10% weapon range. Both cost 2000, plus 1000 for each one of
+# the same type the player owns or is building, and selling one refunds half of what it cost.
+
+Player:
+	OwnedActorCounter:
+
+^OwnedBuildingBonuses:
+	FirepowerMultiplierPerOwnedActor@POWR:
+		Types: powr
+		Percent: 10
+	RangeMultiplierPerOwnedActor@DOME:
+		Types: dome
+		Percent: 10
+
+^Vehicle:
+	Inherits@OWNEDBUILDINGBONUSES: ^OwnedBuildingBonuses
+
+^Infantry:
+	Inherits@OWNEDBUILDINGBONUSES: ^OwnedBuildingBonuses
+
+^Ship:
+	Inherits@OWNEDBUILDINGBONUSES: ^OwnedBuildingBonuses
+
+^Plane:
+	Inherits@OWNEDBUILDINGBONUSES: ^OwnedBuildingBonuses
+
+^Building:
+	Inherits@OWNEDBUILDINGBONUSES: ^OwnedBuildingBonuses
+
+POWR:
+	CountedOwnedActor:
+		Type: powr
+		RequiresCondition: !build-incomplete
+	ProductionCostPerOwnedActor:
+		Types: powr
+		Percent: 50
+	PurchasePriceSellValue:
+	Valued:
+		Cost: 2000
+
+DOME:
+	CountedOwnedActor:
+		Type: dome
+		RequiresCondition: !build-incomplete
+	ProductionCostPerOwnedActor:
+		Types: dome
+		Percent: 50
+	PurchasePriceSellValue:
+	Valued:
+		Cost: 2000

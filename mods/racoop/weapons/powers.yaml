@@ -1,0 +1,7 @@
+# The Cruiser Shelling support power (rules/powers.yaml) fires the Cruiser's shells from beyond the west edge of the map.
+# The power picks the cell each shell lands on, so it's accurate, and it's faster so it crosses the map in a few seconds.
+CruiserShell:
+	Inherits: 8Inch
+	Projectile: Bullet
+		Inaccuracy: 0
+		Speed: 682

@@ -1,6 +1,6 @@
 World:
 	LuaScript:
-		Scripts: utils.lua, campaign.lua, cooptest.lua, coopwaves.lua, waves.lua, twolane.lua, twolane-tests.lua
+		Scripts: utils.lua, campaign.lua, cooptest.lua, coopwaves.lua, waves.lua, twolane.lua, twolane-tests.lua, twolane-tests-upgradebay.lua, twolane-tests-buffs.lua, twolane-tests-powers.lua, twolane-tests-income.lua
 	ScriptLobbyDropdown@test:
 		ID: test
 		Label: dropdown-coop-test.label
@@ -15,5 +15,18 @@ World:
 			force-tanks: twolane-test-force-tanks
 			force-air: twolane-test-force-air
 			force-support: twolane-test-force-support
+			upgrade-promote: twolane-test-upgrade-promote
+			upgrade-refused: twolane-test-upgrade-refused
+			buffs-price: twolane-test-buffs-price
+			buffs-modifiers: twolane-test-buffs-modifiers
+			buffs-refund: twolane-test-buffs-refund
+			powers-infantry: twolane-test-powers-infantry
+			powers-tanks: twolane-test-powers-tanks
+			powers-air: twolane-test-powers-air
+			powers-support: twolane-test-powers-support
+			income-kill: twolane-test-income-kill
+			income-ranked: twolane-test-income-ranked
+			income-overkill: twolane-test-income-overkill
+			income-no-damage: twolane-test-income-no-damage
 		Default: none
 		Visible: False

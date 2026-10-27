@@ -43,6 +43,9 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Player relationships which condition can be applied to.")]
 		public readonly PlayerRelationship ValidRelationships = PlayerRelationship.Ally;
 
+		[Desc("Also affect actors that don't occupy a cell, such as flying aircraft, if their position is inside the footprint.")]
+		public readonly bool AffectsAirborne = false;
+
 		[SequenceReference]
 		[Desc("Sequence to play for granting actor when activated.",
 			"This requires the actor to have the WithSpriteBody trait or one of its derivatives.")]
@@ -92,11 +95,22 @@ namespace OpenRA.Mods.Common.Traits
 
 		public IEnumerable<Actor> UnitsInRange(CPos xy)
 		{
-			var tiles = CellsMatching(xy, footprint, info.Dimensions);
+			var tiles = CellsMatching(xy, footprint, info.Dimensions).ToList();
 			var units = new HashSet<Actor>();
 			foreach (var t in tiles)
 				foreach (var a in Self.World.ActorMap.GetActorsAt(t))
 					units.Add(a);
+
+			if (info.AffectsAirborne && tiles.Count > 0)
+			{
+				var map = Self.World.Map;
+				var half = new WVec(512, 512, 0);
+				var topLeft = map.CenterOfCell(new CPos(tiles.Min(t => t.X), tiles.Min(t => t.Y))) - half;
+				var bottomRight = map.CenterOfCell(new CPos(tiles.Max(t => t.X), tiles.Max(t => t.Y))) + half;
+				foreach (var a in Self.World.ActorMap.ActorsInBox(topLeft, bottomRight))
+					if (tiles.Contains(map.CellContaining(a.CenterPosition)))
+						units.Add(a);
+			}
 
 			return units.Where(a =>
 			{

@@ -93,6 +93,10 @@ Rules:
 	ra|rules/map-generators.yaml
 	racoop|rules/coop.yaml
 	racoop|rules/forces.yaml
+	racoop|rules/upgradebay.yaml
+	racoop|rules/buffs.yaml
+	racoop|rules/powers.yaml
+	racoop|rules/income.yaml
 
 Sequences:
 	ra|sequences/ships.yaml
@@ -187,6 +191,8 @@ FluentMessages:
 	ra|fluent/hotkeys.ftl
 	ra|fluent/rules.ftl
 	racoop|fluent/racoop.ftl
+	racoop|fluent/upgradebay.ftl
+	racoop|fluent/powers.ftl
 
 # ra| is an external package to us; its mod-title/mod-windowtitle keys are intentionally unused.
 AllowUnusedFluentMessagesInExternalPackages: true
@@ -198,6 +204,7 @@ Weapons:
 	ra|weapons/other.yaml
 	ra|weapons/smallcaliber.yaml
 	ra|weapons/superweapons.yaml
+	racoop|weapons/powers.yaml
 
 Voices:
 	ra|audio/voices.yaml

@@ -1,0 +1,115 @@
+# Tech Center support powers. Each force only gets its own: the powers need the force prerequisite
+# from the Construction Yard (see forces.yaml), and the Tech Center they are on.
+
+ATEK:
+	ParatroopersPower@paratroopers:
+		OrderName: CoopParatroopers
+		Prerequisites: force.infantry
+		Icon: paratroopers
+		ChargeInterval: 7500
+		Name: coop-power-paratroopers-name
+		Description: coop-power-paratroopers-description
+		DropItems: E1R1,E1R1,E1R1,E3R1,E3R1
+		ReinforcementsArrivedSpeechNotification: ReinforcementsArrived
+		SelectTargetSpeechNotification: SelectTarget
+		ReinforcementsArrivedTextNotification: notification-reinforcements-have-arrived
+		SelectTargetTextNotification: notification-select-target
+		AllowImpassableCells: false
+		QuantizedFacings: 8
+		CameraActor: camera.paradrop
+		DisplayBeacon: true
+		BeaconPoster: pinficon
+		ArrowSequence: arrow
+		ClockSequence: clock
+		CircleSequence: circles
+		UseDirectionalTarget: True
+		DirectionArrowAnimation: paradirection
+		SupportPowerPaletteOrder: 10
+	# Slows every unit in the area, whoever owns it. Units get the condition from the ^FlashFreezable template below.
+	GrantExternalConditionPower@flashfreeze:
+		OrderName: CoopFlashFreeze
+		Prerequisites: force.tanks
+		Icon: chrono
+		ChargeInterval: 4500
+		Name: coop-power-flashfreeze-name
+		Description: coop-power-flashfreeze-description
+		Condition: frozen
+		Duration: 500
+		Dimensions: 5, 5
+		Footprint: xxxxx xxxxx xxxxx xxxxx xxxxx
+		ValidRelationships: Ally, Neutral, Enemy
+		AffectsAirborne: true
+		# The Tech Center's "active" sequence is the GPS satellite launch
+		Sequence: idle
+		OnFireSound: ironcur9.aud
+		SelectTargetSpeechNotification: SelectTarget
+		SelectTargetTextNotification: notification-select-target
+		DisplayRadarPing: True
+		BlockedCursor: move-blocked
+		SupportPowerPaletteOrder: 20
+	AirstrikePower@parabombs:
+		OrderName: CoopParabombs
+		Prerequisites: force.support
+		Icon: parabombs
+		ChargeInterval: 6000
+		Name: coop-power-parabombs-name
+		Description: coop-power-parabombs-description
+		SelectTargetSpeechNotification: SelectTarget
+		SelectTargetTextNotification: notification-select-target
+		CameraActor: camera
+		CameraRemoveDelay: 150
+		UnitType: badr.bomber
+		QuantizedFacings: 8
+		DisplayBeacon: true
+		BeaconPoster: pbmbicon
+		SquadSize: 1
+		SquadOffset: 1792,1792,0
+		ArrowSequence: arrow
+		ClockSequence: clock
+		CircleSequence: circles
+		UseDirectionalTarget: True
+		DirectionArrowAnimation: paradirection
+		SupportPowerPaletteOrder: 30
+	# Shells from cruisers off the west edge of the map, landing on random cells of the area
+	ProjectileBarragePower@cruisershelling:
+		OrderName: CoopCruiserShelling
+		Prerequisites: force.support
+		Icon: sonar
+		ChargeInterval: 4500
+		Name: coop-power-cruisershelling-name
+		Description: coop-power-cruisershelling-description
+		Weapon: CruiserShell
+		Count: 6
+		Dimensions: 4, 4
+		Interval: 10
+		SelectTargetSpeechNotification: SelectTarget
+		SelectTargetTextNotification: notification-select-target
+		DisplayRadarPing: True
+		SupportPowerPaletteOrder: 40
+	SupportPowerChargeBar:
+
+# Flash Freeze: units at 60% speed while frozen, tinted blue, with a bar showing the time left.
+^FlashFreezable:
+	ExternalCondition@FROZEN:
+		Condition: frozen
+	SpeedMultiplier@FROZEN:
+		RequiresCondition: frozen
+		Modifier: 60
+	WithColoredOverlay@FROZEN:
+		RequiresCondition: frozen
+		Color: 4080FF80
+	TimedConditionBar@FROZEN:
+		Condition: frozen
+		Color: 80C0FF
+
+^Infantry:
+	Inherits@FROZEN: ^FlashFreezable
+
+^Vehicle:
+	Inherits@FROZEN: ^FlashFreezable
+
+^Ship:
+	Inherits@FROZEN: ^FlashFreezable
+
+^Plane:
+	Inherits@FROZEN: ^FlashFreezable

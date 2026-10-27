@@ -1,0 +1,29 @@
+# Kill income: players earn money by killing enemies instead of gathering ore.
+# When a unit dies, the player that dealt it the most damage gets 30% of its value,
+# which grows by 25% of its cost per rank. See GivesDamageShareBounty for how ties are decided.
+# Only players that aren't non-combatants are paid, so the enemy waves' player never is.
+
+# The same templates that carry RA's kill bounty (^GlobalBounty), except buildings:
+# the enemy has none, and not every building template has health.
+^KillIncome:
+	GivesDamageShareBounty:
+		Percentage: 30
+		PercentagePerLevel: 25
+
+^Vehicle:
+	Inherits@KILLINCOME: ^KillIncome
+
+^Infantry:
+	Inherits@KILLINCOME: ^KillIncome
+
+^Ship:
+	Inherits@KILLINCOME: ^KillIncome
+
+^NeutralPlane:
+	Inherits@KILLINCOME: ^KillIncome
+
+# RA's own kill bounty would pay a second time, so it is locked off.
+Player:
+	LobbyPrerequisiteCheckbox@GLOBALBOUNTY:
+		Enabled: False
+		Locked: True
