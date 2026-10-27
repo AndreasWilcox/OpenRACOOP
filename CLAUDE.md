@@ -115,3 +115,11 @@ Running PowerShell with `2>&1` on `coop.ps1` breaks the build: `dotnet` writes t
 - Every `.cs` file starts with the `#region Copyright & License Information` GPLv3 header block. Copy it from an existing file.
 - Nullable reference types are disabled. `.csproj` files include `**/*.cs` explicitly, so new files are picked up automatically.
 - Upstream contribution expectations: rebase on `bleed`, run `make check` and `make test`, and add new contributors to `AUTHORS`.
+
+## Working preferences
+
+- **Questions:** list open questions as plain numbered text in the reply, not as multiple-choice pop-ups (AskUserQuestion). The user prefers answering in their own words.
+- **Design doc:** only edit `GameModeDesignDoc.md` when explicitly asked. It's the user's own spec. Don't commit it unless asked, since it often holds their uncommitted edits.
+- **Setup:** don't add setup, download or automation logic to `coop.ps1` that duplicates what the game already does (such as content installation). Document the steps in CLAUDE.md instead.
+- **Commits and pushes:** commit only when asked, and push only when asked.
+- **Open tasks:** `TODO.md` lists manual checks and follow-ups still to do.
