@@ -9,7 +9,7 @@
 #
 # smoke, test and check run the game in a hidden window (no window or console pops up); play and duo never do.
 #
-# Options: -Map <folder name>  (default coop-01), -NoBuild, -Fullscreen, -Port <n> (duo, default 1234),
+# Options: -Map <folder name>  (default two-lane), -NoBuild, -Fullscreen, -Port <n> (duo, default 1234),
 #          -Timeout <seconds> (smoke/test, per run, default 90),
 #          -Scenario <name> (test: run only this scenario; default runs all of the map's scenarios),
 #          -Show (smoke/test: show the game window instead of hiding it, for debugging),
@@ -21,7 +21,7 @@ param(
 	[Parameter(Position = 0)]
 	[ValidateSet("play", "duo", "check", "smoke", "test", "lint")]
 	[string]$Command = "play",
-	[string]$Map = "coop-01",
+	[string]$Map = "two-lane",
 	[switch]$NoBuild,
 	[switch]$Fullscreen,
 	[int]$Port = 1234,
