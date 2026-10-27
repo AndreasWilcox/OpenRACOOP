@@ -113,6 +113,7 @@ ATEK:
 	-Power:
 	Buildable:
 		Prerequisites: ~force
+		Description: coop-actor-atek-description
 	Valued:
 		Cost: 3000
 	# RA's GPS power is removed: the forces' own powers are added to the Tech Center in powers.yaml
@@ -124,6 +125,7 @@ FIX:
 	-Power:
 	Buildable:
 		Prerequisites: ~force
+		Description: coop-actor-fix-description
 	Valued:
 		Cost: 1000
 	RepairsUnits:
@@ -215,6 +217,7 @@ AFLD:
 	-Power:
 	Buildable:
 		Prerequisites: ~force.air
+		Description: coop-actor-afld-description
 	Valued:
 		Cost: 500
 	# Paratroopers and parabombs are Tech Center powers of other forces instead (see powers.yaml)
@@ -235,6 +238,7 @@ HPAD:
 	-Power:
 	Buildable:
 		Prerequisites: ~force.air
+		Description: coop-actor-hpad-description
 	Valued:
 		Cost: 600
 	RepairsUnits:
@@ -253,6 +257,7 @@ WEAP.AIR:
 		Image: weap
 	Buildable:
 		Prerequisites: ~force.air
+		Description: coop-actor-weap-air-description
 		BuildPaletteOrder: 81
 	Valued:
 		Cost: 400

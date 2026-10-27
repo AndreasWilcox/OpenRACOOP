@@ -1,5 +1,5 @@
 # Kill income: players earn money by killing enemies instead of gathering ore.
-# When a player kills a unit, 30% of its value is split evenly between all players, whoever damaged it.
+# When a player kills a unit, 80% of its value is split evenly between all players, whoever damaged it.
 # The value grows by 25% of its cost per rank. Units killed by the script or by the enemy itself pay nothing.
 # Only players that aren't non-combatants are paid, so the enemy waves' player never is.
 
@@ -7,7 +7,7 @@
 # the enemy has none, and not every building template has health.
 ^KillIncome:
 	GivesSharedBounty:
-		Percentage: 30
+		Percentage: 80
 		PercentagePerLevel: 25
 
 ^Vehicle:

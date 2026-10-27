@@ -53,3 +53,6 @@ update.log
 
 # Screenshots copied by the coop.ps1 test runner
 test-results/
+
+# Personal Claude Code settings
+.claude/settings.local.json

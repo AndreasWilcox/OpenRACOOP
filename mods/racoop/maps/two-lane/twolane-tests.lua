@@ -199,3 +199,100 @@ Scenarios["call-early"] = function()
 		CoopTest.Pass()
 	end)
 end
+
+-- With no player units left, ground units and aircraft attack the Construction Yard.
+Scenarios["attack-base"] = function()
+	WaveConfig =
+	{
+		{
+			Delay = DateTime.Seconds(1),
+			Groups =
+			{
+				{ Units = { "jeep" }, Lane = "north" },
+				{ Units = { "yak" }, Lane = "north" },
+				{ Units = { "hind" }, Lane = "south" }
+			}
+		}
+	}
+
+	local yard = Humans[1].GetActorsByType("fact")[1]
+	local hits = { }
+	Trigger.OnDamaged(yard, function(_, attacker)
+		if attacker then
+			hits[attacker.Type] = true
+		end
+	end)
+
+	-- Don't let the yard die, which would lose the game
+	local heal
+	heal = function()
+		if not yard.IsDead then
+			yard.Health = yard.MaxHealth
+			Trigger.AfterDelay(DateTime.Seconds(1), heal)
+		end
+	end
+	heal()
+
+	local check
+	check = function()
+		if hits["jeep"] and hits["yak"] and hits["hind"] then
+			Camera.Position = yard.CenterPosition
+			CoopTest.Screenshot("yard-attacked")
+			Trigger.AfterDelay(DateTime.Seconds(1), CoopTest.Pass)
+		else
+			Trigger.AfterDelay(DateTime.Seconds(1), check)
+		end
+	end
+	check()
+
+	Trigger.AfterDelay(DateTime.Seconds(100), function()
+		Utils.Do({ "jeep", "yak", "hind" }, function(type)
+			CoopTest.Assert(hits[type], type .. " attacked the Construction Yard")
+		end)
+	end)
+end
+
+-- MAD tanks and Demolition Trucks charge the base and blow themselves up there.
+-- The MAD tank has no weapon, so choosing its target mustn't rely on what it can attack.
+Scenarios["suicide"] = function()
+	WaveConfig =
+	{
+		{
+			Delay = DateTime.Seconds(1),
+			Groups =
+			{
+				{ Units = { "qtnk" }, Lane = "north" },
+				{ Units = { "dtrk" }, Lane = "south" }
+			}
+		}
+	}
+
+	-- Keep the Construction Yards standing, so the game isn't lost
+	KeepAlive()
+	local heal
+	heal = function()
+		Utils.Do(Humans[1].GetActorsByType("fact"), function(yard) yard.Health = yard.MaxHealth end)
+		Trigger.AfterDelay(5, heal)
+	end
+	heal()
+
+	local units = { }
+	CoopWaves.OnGroupSpawned = function(_, spawned)
+		Utils.Do(spawned, function(a) units[#units + 1] = a end)
+	end
+
+	-- Pass once both are dead, or fail on the one still alive after 2 minutes
+	local check
+	check = function()
+		if #units == 2 and Utils.All(units, function(a) return a.IsDead end) then
+			CoopTest.Pass()
+		elseif DateTime.GameTime > DateTime.Seconds(120) then
+			Utils.Do(units, function(a)
+				CoopTest.Assert(a.IsDead, a.Type .. " blew itself up")
+			end)
+		else
+			Trigger.AfterDelay(DateTime.Seconds(1), check)
+		end
+	end
+	Trigger.AfterDelay(DateTime.Seconds(2), check)
+end

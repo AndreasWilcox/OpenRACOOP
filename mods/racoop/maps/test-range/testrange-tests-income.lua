@@ -15,7 +15,7 @@ local function SpawnEnemy(type, y)
 	return Actor.Create(type, true, { Owner = Enemy, Location = CPos.New(28, y) })
 end
 
--- Killing an enemy unit pays 30% of its cost, and RA's kill bounty doesn't pay as well.
+-- Killing an enemy unit pays 80% of its cost, and RA's kill bounty doesn't pay as well.
 Scenarios["income-kill"] = function()
 	local player = Humans[1]
 	CoopTest.Assert(not player.HasPrerequisites({ "global-bounty" }), "RA's kill bounty option is off")
@@ -27,9 +27,9 @@ Scenarios["income-kill"] = function()
 	CoopTest.AssertEqual(player.Cash, cash, "cash after damaging without killing")
 	Test.Damage(rifle, HumanAttacker(), rifle.MaxHealth)
 	CoopTest.Assert(rifle.IsDead, "the rifle infantry is dead")
-	CoopTest.AssertEqual(player.Cash - cash, 30, "cash for killing a rifle infantry costing 100")
+	CoopTest.AssertEqual(player.Cash - cash, 80, "cash for killing a rifle infantry costing 100")
 
-	-- The floating "+$30" is shown over where the unit died
+	-- The floating "+$80" is shown over where the unit died
 	Trigger.AfterDelay(2, function()
 		CoopTest.Screenshot("bounty")
 		Trigger.AfterDelay(DateTime.Seconds(1), CoopTest.Pass)
@@ -47,8 +47,8 @@ Scenarios["income-ranked"] = function()
 	Test.Damage(tank, HumanAttacker(), tank.MaxHealth)
 	CoopTest.Assert(tank.IsDead, "the heavy tank is dead")
 
-	-- 1150 * 150% = 1725, and 30% of that is 517 (rounded down)
-	CoopTest.AssertEqual(player.Cash - cash, 517, "cash for killing a heavy tank costing 1150 at rank 2")
+	-- 1150 * 150% = 1725, and 80% of that is 1380
+	CoopTest.AssertEqual(player.Cash - cash, 1380, "cash for killing a heavy tank costing 1150 at rank 2")
 	CoopTest.Pass()
 end
 
@@ -63,8 +63,8 @@ Scenarios["income-any-killer"] = function()
 	Test.Damage(tank, HumanAttacker(), 1)
 	CoopTest.Assert(tank.IsDead, "the medium tank is dead")
 
-	-- 30% of 850
-	CoopTest.AssertEqual(player.Cash - cash, 255, "cash for finishing off a medium tank costing 850")
+	-- 80% of 850
+	CoopTest.AssertEqual(player.Cash - cash, 680, "cash for finishing off a medium tank costing 850")
 	CoopTest.Pass()
 end
 

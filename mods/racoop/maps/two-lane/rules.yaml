@@ -11,5 +11,7 @@ World:
 			air: twolane-test-air
 			victory: twolane-test-victory
 			call-early: twolane-test-call-early
+			attack-base: twolane-test-attack-base
+			suicide: twolane-test-suicide
 		Default: none
 		Visible: False

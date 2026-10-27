@@ -25,3 +25,5 @@ twolane-test-waves = Waves
 twolane-test-air = Air
 twolane-test-victory = Victory
 twolane-test-call-early = Call early
+twolane-test-attack-base = Attack base
+twolane-test-suicide = Suicide units

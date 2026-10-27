@@ -37,6 +37,8 @@ POWR:
 		Types: powr
 		Percent: 50
 	PurchasePriceSellValue:
+	Buildable:
+		Description: coop-actor-powr-description
 	Valued:
 		Cost: 2000
 
@@ -48,5 +50,7 @@ DOME:
 		Types: dome
 		Percent: 50
 	PurchasePriceSellValue:
+	Buildable:
+		Description: coop-actor-dome-description
 	Valued:
 		Cost: 2000

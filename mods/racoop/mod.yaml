@@ -193,6 +193,7 @@ FluentMessages:
 	racoop|fluent/racoop.ftl
 	racoop|fluent/upgradebay.ftl
 	racoop|fluent/powers.ftl
+	racoop|fluent/buildings.ftl
 
 # ra| is an external package to us; its mod-title/mod-windowtitle keys are intentionally unused.
 AllowUnusedFluentMessagesInExternalPackages: true

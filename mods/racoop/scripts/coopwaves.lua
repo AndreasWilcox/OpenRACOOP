@@ -112,9 +112,18 @@ local function Closest(actor, candidates)
 	return best
 end
 
+-- Whether the actor can attack the target. Actors without a weapon (MAD tanks) go for anything on the ground.
+local function CanAttack(actor, target)
+	if actor.HasProperty("CanTarget") then
+		return actor.CanTarget(target)
+	end
+
+	return target.CenterPosition.Z == 0
+end
+
 -- The closest player unit the actor can attack. If there are none, the closest Construction Yard, then any building.
 local function ChooseTarget(actor)
-	local function Attackable(a) return actor.CanTarget(a) end
+	local function Attackable(a) return CanAttack(actor, a) end
 
 	local units = HumanActors(function(a) return a.HasProperty("Move") and Attackable(a) end)
 	if #units > 0 then
@@ -129,8 +138,35 @@ local function ChooseTarget(actor)
 	return Closest(actor, HumanActors(Attackable))
 end
 
+-- Whether any player unit can be attacked by the actor.
+local function PlayerUnitsLeft(actor)
+	return #HumanActors(function(a) return a.HasProperty("Move") and CanAttack(actor, a) end) > 0
+end
+
+-- While attacking a building, check every second for player units to go after instead.
+-- Stopping makes the actor idle, so it picks a new target.
+local function AttackBuilding(actor, target)
+	actor.Attack(target)
+
+	local check
+	check = function()
+		if actor.IsDead or target.IsDead or not actor.IsInWorld then
+			return
+		end
+
+		if PlayerUnitsLeft(actor) then
+			actor.Stop()
+		else
+			Trigger.AfterDelay(DateTime.Seconds(1), check)
+		end
+	end
+
+	Trigger.AfterDelay(DateTime.Seconds(1), check)
+end
+
 -- Go after the players: attack-move towards the closest target, picking a new one whenever idle.
 -- Attack-moving means anything that crosses the unit's path is fought on the way.
+-- Attack-moving units only pick defenses among buildings, so other buildings are attacked directly.
 local function Engage(actor)
 	Trigger.OnIdle(actor, function()
 		local target = ChooseTarget(actor)
@@ -140,6 +176,8 @@ local function Engage(actor)
 			actor.Attack(target)
 		elseif actor.Type == "qtnk" then
 			actor.Detonate(target)
+		elseif not target.HasProperty("Move") then
+			AttackBuilding(actor, target)
 		else
 			actor.AttackMove(target.Location, 2)
 		end
