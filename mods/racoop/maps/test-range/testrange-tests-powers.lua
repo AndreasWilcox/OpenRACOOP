@@ -9,7 +9,7 @@ local ForcePowers =
 {
 	infantry = { "CoopParatroopers" },
 	tanks = { "CoopFlashFreeze" },
-	air = { },
+	air = { "CoopStrafingRun" },
 	support = { "CoopCruiserShelling", "CoopParabombs" }
 }
 
@@ -18,6 +18,7 @@ local ChargeTicks =
 {
 	CoopParatroopers = 7500,
 	CoopFlashFreeze = DateTime.Minutes(3),
+	CoopStrafingRun = DateTime.Minutes(3),
 	CoopParabombs = DateTime.Minutes(4),
 	CoopCruiserShelling = DateTime.Minutes(3)
 }
@@ -177,12 +178,44 @@ local function TestParabombs(player, done)
 	end)
 end
 
+-- Strafing Run, flying east, hits enemies along a line through the target (5 cells either side),
+-- but not enemies off the line or the player's own units on it.
+local function TestStrafingRun(player, done)
+	local target = CPos.New(30, 15)
+	local hit = { }
+	local watch = function(actor, key)
+		Trigger.OnDamaged(actor, function(_, attacker)
+			if attacker and attacker.Owner == player then
+				hit[key] = true
+			end
+		end)
+	end
+
+	local line = { 26, 28, 30, 32, 34 }
+	Utils.Do(line, function(x) watch(Dummy("e1", Enemy, CPos.New(x, 15)), "enemy " .. x) end)
+	watch(Dummy("e1", Enemy, CPos.New(30, 19)), "enemy off the line")
+	watch(Dummy("e1", player, CPos.New(29, 15)), "own unit")
+
+	-- Facing 192 is east
+	CoopTest.Assert(Test.ActivateSupportPower(player, "CoopStrafingRun", target, 192), "Strafing Run activated")
+	Camera.Position = Map.CenterOfCell(target)
+
+	WaitFor(function() return #Utils.Where(line, function(x) return hit["enemy " .. x] end) == #line end, DateTime.Seconds(40), function()
+		Utils.Do(line, function(x)
+			CoopTest.Assert(hit["enemy " .. x], "the strafing run hit the enemy at x " .. x)
+		end)
+		CoopTest.Assert(not hit["enemy off the line"], "an enemy 4 cells off the line wasn't hit")
+		CoopTest.Assert(not hit["own unit"], "the player's own unit on the line wasn't hit")
+		done()
+	end)
+end
+
 -- Extra checks per force, run after the powers have been checked
 local ForceTests =
 {
 	infantry = { TestParatroopers },
 	tanks = { TestFlashFreeze },
-	air = { },
+	air = { TestStrafingRun },
 	support = { TestCruiserShelling, TestParabombs }
 }
 

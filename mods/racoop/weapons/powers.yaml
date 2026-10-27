@@ -5,3 +5,27 @@ CruiserShell:
 	Projectile: Bullet
 		Inaccuracy: 0
 		Speed: 682
+
+# The Strafing Run support power's planes (YAK.Strafer in rules/powers.yaml) fire one burst each, when the target comes in range.
+# The 21 shots walk along the flight path, 512 apart, from 5 cells before the target to 5 cells past it.
+# Deadly to infantry and light vehicles, weak against tanks and buildings. It only hurts enemies.
+StrafeGun:
+	Inherits: ^HeavyMG
+	Range: 7c0
+	ReloadDelay: 250
+	Burst: 21
+	BurstDelays: 2
+	FirstBurstTargetOffset: -5120,0,0
+	FollowingBurstTargetOffset: 512,0,0
+	Projectile: InstantHit
+		Blockable: false
+	Warhead@1Dam: SpreadDamage
+		Spread: 512
+		Damage: 12000
+		ValidRelationships: Enemy, Neutral
+		Versus:
+			None: 100
+			Wood: 25
+			Light: 80
+			Heavy: 40
+			Concrete: 20

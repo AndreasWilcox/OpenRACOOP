@@ -7,6 +7,7 @@ These were built and pass the automated tests (`.\coop test -Map test-range`) bu
 - [ ] **Tech Center powers over the network,** with one client per force:
   - [ ] Infantry: Paratroopers
   - [ ] Tanks: Flash Freeze (also slows your own units)
+  - [ ] Air: Strafing Run. Check how it looks, whether 3 Yaks survive the waves' anti-air, and its damage.
   - [ ] Support: Parabombs and Cruiser Shelling. Cruiser Shelling may be too weak for a 3-minute cooldown.
 - [X] **Kill income with two players:** when either player kills a unit, both get a share of its value (with 30% split two ways, a rifle infantry gave +15 each; it is now 80%, so +40), and each sees their own amount. Automated tests only cover this with one player.
 - [ ] **Power Plants and Radar Domes:** the price rises by 1000 per one owned or queued, selling refunds half of what was paid, and the bonuses apply.
@@ -19,7 +20,6 @@ These were built and pass the automated tests (`.\coop test -Map test-range`) bu
 - [ ] Repair cost and kill bounty of Power Plants and Radar Domes are based on the price each was bought for, so later ones cost more to repair. Is that OK?
 - [ ] Tech Center powers come from the force, which the Construction Yard provides. Losing it removes the powers until it's rebuilt. Is that OK?
 - [ ] Flash Freeze cooldown: set to 3 minutes, since the doc doesn't give one.
-- [ ] A power for the Air force.
 
 ## Later
 - [ ] Side objectives (on hold in the design doc).

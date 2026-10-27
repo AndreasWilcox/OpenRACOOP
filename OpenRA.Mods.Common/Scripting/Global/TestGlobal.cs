@@ -141,8 +141,9 @@ namespace OpenRA.Mods.Common.Scripting
 		}
 
 		[Desc("Activate the player's support power at the target cell at once, even if it isn't charged yet. " +
+			"For a power with a direction (such as an airstrike), facing is the direction (0-255, 0 is north, 64 west). " +
 			"Returns false if the player can't use the power.")]
-		public bool ActivateSupportPower(Player player, string power, CPos target)
+		public bool ActivateSupportPower(Player player, string power, CPos target, int facing = 0)
 		{
 			var manager = player.PlayerActor.Trait<SupportPowerManager>();
 			if (!manager.Powers.TryGetValue(power, out var instance) || !instance.Active)
@@ -152,7 +153,7 @@ namespace OpenRA.Mods.Common.Scripting
 			if (source == null)
 				return false;
 
-			var order = new Order(power, player.PlayerActor, Target.FromCell(player.World, target), false);
+			var order = new Order(power, player.PlayerActor, Target.FromCell(player.World, target), false) { ExtraData = (uint)facing };
 			source.Activate(source.Self, order, manager);
 			return true;
 		}

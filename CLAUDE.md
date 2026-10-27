@@ -78,7 +78,7 @@ Running PowerShell with `2>&1` on `coop.ps1` breaks the build: `dotnet` writes t
     - A building refunds half of what it was bought for: `PurchasePriceSellValue` records the price at placement, and `GetSellValue()` uses it.
     - This is built on `OwnedActorCounter`, `CountedOwnedActor` and the `*PerOwnedActor` traits.
   - `powers.yaml`: Tech Center powers, gated by `force.<name>`.
-    - Infantry: Paratroopers. Tanks: Flash Freeze. Support: Parabombs and Cruiser Shelling (`ProjectileBarragePower`). Air has none yet.
+    - Infantry: Paratroopers. Tanks: Flash Freeze. Air: Strafing Run (an `AirstrikePower` of `YAK.Strafer` planes firing `StrafeGun` along their path). Support: Parabombs and Cruiser Shelling (`ProjectileBarragePower`).
     - Each power has its own `OrderName`, because powers are keyed by it.
   - `income.yaml`: when a player kills a unit, `GivesSharedBounty` splits 80% of its value, including its rank, evenly between all players (80%/N each, whoever did the damage). Kills by the script or the enemy pay nothing. RA's kill bounty option is locked off.
 - **Waves:**

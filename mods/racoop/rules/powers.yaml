@@ -70,6 +70,30 @@ ATEK:
 		UseDirectionalTarget: True
 		DirectionArrowAnimation: paradirection
 		SupportPowerPaletteOrder: 30
+	# Three Yaks fly across the map in the chosen direction, each strafing a line through the target (YAK.Strafer below)
+	AirstrikePower@strafingrun:
+		OrderName: CoopStrafingRun
+		Prerequisites: force.air
+		Icon: spyplane
+		ChargeInterval: 4500
+		Name: coop-power-strafingrun-name
+		Description: coop-power-strafingrun-description
+		SelectTargetSpeechNotification: SelectTarget
+		SelectTargetTextNotification: notification-select-target
+		CameraActor: camera
+		CameraRemoveDelay: 150
+		UnitType: yak.strafer
+		QuantizedFacings: 8
+		DisplayBeacon: true
+		BeaconPoster: camicon
+		SquadSize: 3
+		SquadOffset: -1024,1024,0
+		ArrowSequence: arrow
+		ClockSequence: clock
+		CircleSequence: circles
+		UseDirectionalTarget: True
+		DirectionArrowAnimation: paradirection
+		SupportPowerPaletteOrder: 25
 	# Shells from cruisers off the west edge of the map, landing on random cells of the area
 	ProjectileBarragePower@cruisershelling:
 		OrderName: CoopCruiserShelling
@@ -87,6 +111,41 @@ ATEK:
 		DisplayRadarPing: True
 		SupportPowerPaletteOrder: 40
 	SupportPowerChargeBar:
+
+# Strafing Run planes: Yaks that fly straight across the map, fire one long burst of StrafeGun (weapons/powers.yaml)
+# along their path when they near the target, and leave. They can't be controlled, but they can be shot down.
+YAK.Strafer:
+	Inherits: ^NeutralPlane
+	-Selectable:
+	Interactable:
+	-Voiced:
+	-EjectOnDeath:
+	-MapEditorData:
+	RejectsOrders:
+	Tooltip:
+		Name: actor-yak.name
+	RenderSprites:
+		Image: yak
+	Health:
+		HP: 20000
+	Aircraft:
+		CruiseAltitude: 2560
+		TurnSpeed: 16
+		Speed: 178
+		Repulsable: False
+		MaximumPitch: 56
+	AttackBomber:
+		FacingTolerance: 8
+	Armament:
+		Weapon: StrafeGun
+		LocalOffset: 256,-213,0, 256,213,0
+		MuzzleSequence: muzzle
+	WithMuzzleOverlay:
+	Contrail:
+		Offset: -853,0,0
+		StartColorAlpha: 128
+	SpawnActorOnDeath:
+		Actor: YAK.Husk
 
 # Flash Freeze: units at 60% speed while frozen, tinted blue, with a bar showing the time left.
 ^FlashFreezable:
