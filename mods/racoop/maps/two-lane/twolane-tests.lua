@@ -99,6 +99,8 @@ Scenarios["air"] = function()
 		}
 	}
 
+	-- Only aircraft, so they are the only ones attacking the tanks
+	CoopWaves.RequireAntiAir = false
 	KeepAlive()
 
 	-- Sturdy targets for the aircraft, between the lanes. Heavy tanks can't shoot back at aircraft.
@@ -267,6 +269,9 @@ Scenarios["suicide"] = function()
 		}
 	}
 
+	-- Only the two suicide units, so the scenario can wait for both to be dead
+	CoopWaves.RequireAntiAir = false
+
 	-- Keep the Construction Yards standing, so the game isn't lost
 	KeepAlive()
 	local heal
@@ -295,4 +300,27 @@ Scenarios["suicide"] = function()
 		end
 	end
 	Trigger.AfterDelay(DateTime.Seconds(2), check)
+end
+
+-- A group with Lane = "random" picks a lane each time it is sent, so a repeating group uses both lanes.
+Scenarios["random-lane"] = function()
+	WaveConfig =
+	{
+		{
+			Delay = DateTime.Seconds(1),
+			Groups = { { Units = { "e1" }, Lane = "random", Repeat = { Every = DateTime.Seconds(1), Times = 12 } } }
+		}
+	}
+
+	KeepAlive()
+	local sent = { north = 0, south = 0 }
+	CoopWaves.OnGroupSpawned = function(_, _, laneName)
+		sent[laneName] = sent[laneName] + 1
+	end
+
+	Trigger.AfterDelay(DateTime.Seconds(15), function()
+		CoopTest.AssertEqual(sent.north + sent.south, 12, "groups sent")
+		CoopTest.Assert(sent.north > 0 and sent.south > 0, "both lanes were used (north " .. sent.north .. ", south " .. sent.south .. ")")
+		CoopTest.Pass()
+	end)
 end

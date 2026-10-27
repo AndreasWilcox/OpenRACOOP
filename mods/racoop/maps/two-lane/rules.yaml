@@ -13,5 +13,6 @@ World:
 			call-early: twolane-test-call-early
 			attack-base: twolane-test-attack-base
 			suicide: twolane-test-suicide
+			random-lane: twolane-test-random-lane
 		Default: none
 		Visible: False

@@ -31,6 +31,16 @@ CoopWaves.BaseTypes = { "fact" }
 -- What the players must keep at least one of: losing them all loses the game.
 CoopWaves.LifelineTypes = { "fact", "mcv" }
 
+-- Units that can shoot at aircraft (rifles, rockets, machine guns, flak, mammoth tusks, Longbow missiles).
+-- Every wave must have one, so a player relying on aircraft always meets some resistance.
+CoopWaves.AntiAirUnits = { "e1", "e3", "jeep", "ftrk", "4tnk", "heli" }
+
+-- Set to false (e.g. in a test) to allow waves without anti-air units.
+CoopWaves.RequireAntiAir = true
+
+-- A group with this lane is sent down a randomly picked lane, every time it is sent.
+CoopWaves.RandomLane = "random"
+
 local function Contains(list, value)
 	return Utils.Any(list, function(v) return v == value end)
 end
@@ -55,9 +65,10 @@ local function Validate(config, lanes)
 			ConfigError(where .. " has no Groups")
 		end
 
+		local antiAir = false
 		for j, group in ipairs(wave.Groups) do
 			local groupWhere = where .. ", group " .. j
-			if not lanes[group.Lane] then
+			if group.Lane ~= CoopWaves.RandomLane and not lanes[group.Lane] then
 				ConfigError(groupWhere .. " has unknown lane '" .. tostring(group.Lane) .. "'")
 			end
 
@@ -71,6 +82,8 @@ local function Validate(config, lanes)
 				if Contains(CoopWaves.ExcludedUnits, unit) then
 					ConfigError(groupWhere .. ": '" .. unit .. "' can't be used in waves")
 				end
+
+				antiAir = antiAir or Contains(CoopWaves.AntiAirUnits, unit)
 			end
 
 			if group.Rank and (group.Rank < 0 or group.Rank > 4) then
@@ -80,6 +93,10 @@ local function Validate(config, lanes)
 			if group.Repeat and (not group.Repeat.Every or group.Repeat.Every <= 0 or not group.Repeat.Times or group.Repeat.Times < 1) then
 				ConfigError(groupWhere .. " needs Repeat = { Every = <ticks>, Times = <count> }")
 			end
+		end
+
+		if CoopWaves.RequireAntiAir and not antiAir then
+			ConfigError(where .. " has no unit that can shoot at aircraft (one of " .. table.concat(CoopWaves.AntiAirUnits, ", ") .. ")")
 		end
 	end
 end
@@ -200,7 +217,13 @@ local function Escort(actor, group)
 end
 
 local function SpawnGroup(group)
-	local lane = CoopWaves.Lanes[group.Lane]
+	-- Utils.Random uses the shared random, so every player picks the same lane
+	local laneName = group.Lane
+	if laneName == CoopWaves.RandomLane then
+		laneName = Utils.Random(CoopWaves.LaneNames)
+	end
+
+	local lane = CoopWaves.Lanes[laneName]
 	local path = { lane.Spawn.Location, lane.EastGap.Location }
 	local units
 
@@ -231,13 +254,14 @@ local function SpawnGroup(group)
 		CoopWaves.Units[#CoopWaves.Units + 1] = a
 	end)
 
-	CoopWaves.OnGroupSpawned(group, units)
+	CoopWaves.OnGroupSpawned(group, units, laneName)
 end
 
 --- Called with every group as it spawns, for tests to hook into.
 ---@param group table
 ---@param units actor[]
-CoopWaves.OnGroupSpawned = function(group, units) end
+---@param laneName string The lane it was sent down (picked when the group's Lane is "random")
+CoopWaves.OnGroupSpawned = function(group, units, laneName) end
 
 local function Hint(wave)
 	local hint = CoopWaves.Config[wave] and CoopWaves.Config[wave].Hint
@@ -350,6 +374,13 @@ CoopWaves.Start = function(config, lanes, humans, enemy)
 
 	CoopWaves.Config = config
 	CoopWaves.Lanes = lanes
+
+	-- Sorted, so random lanes are picked from the same list on every player's machine
+	CoopWaves.LaneNames = { }
+	for name in pairs(lanes) do
+		CoopWaves.LaneNames[#CoopWaves.LaneNames + 1] = name
+	end
+	table.sort(CoopWaves.LaneNames)
 	CoopWaves.Humans = humans
 	CoopWaves.Enemy = enemy
 
