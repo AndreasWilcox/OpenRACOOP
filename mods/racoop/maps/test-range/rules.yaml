@@ -1,0 +1,46 @@
+World:
+	LuaScript:
+		Scripts: utils.lua, campaign.lua, cooptest.lua, testrange.lua, testrange-tests.lua, testrange-tests-upgradebay.lua, testrange-tests-buffs.lua, testrange-tests-powers.lua, testrange-tests-income.lua
+	ScriptLobbyDropdown@test:
+		ID: test
+		Label: dropdown-coop-test.label
+		Description: dropdown-coop-test.description
+		Values:
+			none: options-coop-test.none
+			force-infantry: testrange-test-force-infantry
+			force-tanks: testrange-test-force-tanks
+			force-air: testrange-test-force-air
+			force-support: testrange-test-force-support
+			upgrade-promote: testrange-test-upgrade-promote
+			upgrade-refused: testrange-test-upgrade-refused
+			buffs-price: testrange-test-buffs-price
+			buffs-modifiers: testrange-test-buffs-modifiers
+			buffs-refund: testrange-test-buffs-refund
+			powers-infantry: testrange-test-powers-infantry
+			powers-tanks: testrange-test-powers-tanks
+			powers-air: testrange-test-powers-air
+			powers-support: testrange-test-powers-support
+			income-kill: testrange-test-income-kill
+			income-ranked: testrange-test-income-ranked
+			income-any-killer: testrange-test-income-any-killer
+			income-not-player-kill: testrange-test-income-not-player-kill
+		Default: none
+		Visible: False
+
+# Test-only buildings, hidden until a scenario calls player.GrantCondition("test-buildings").
+Player:
+	ExternalCondition@TESTBUILDINGS:
+		Condition: test-buildings
+	ProvidesPrerequisite@TESTBUILDINGS:
+		Prerequisite: test-buildings
+		RequiresCondition: test-buildings
+
+# A Power Plant that builds almost instantly. It counts, is priced and refunds exactly like a Power Plant.
+POWR.TEST:
+	Inherits: POWR
+	RenderSprites:
+		Image: powr
+	Buildable:
+		Prerequisites: ~test-buildings
+		BuildDuration: 1
+		BuildDurationModifier: 100

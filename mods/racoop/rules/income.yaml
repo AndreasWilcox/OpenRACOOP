@@ -1,12 +1,12 @@
 # Kill income: players earn money by killing enemies instead of gathering ore.
-# When a unit dies, the player that dealt it the most damage gets 30% of its value,
-# which grows by 25% of its cost per rank. See GivesDamageShareBounty for how ties are decided.
+# When a player kills a unit, 30% of its value is split evenly between all players, whoever damaged it.
+# The value grows by 25% of its cost per rank. Units killed by the script or by the enemy itself pay nothing.
 # Only players that aren't non-combatants are paid, so the enemy waves' player never is.
 
 # The same templates that carry RA's kill bounty (^GlobalBounty), except buildings:
 # the enemy has none, and not every building template has health.
 ^KillIncome:
-	GivesDamageShareBounty:
+	GivesSharedBounty:
 		Percentage: 30
 		PercentagePerLevel: 25
 

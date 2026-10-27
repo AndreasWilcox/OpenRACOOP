@@ -1,13 +1,8 @@
 --[[
-   Test scenarios for the Power Plant and Radar Dome bonuses (racoop|rules/buffs.yaml), run with `coop test -Map two-lane`.
-   Adds to the Scenarios table from twolane-tests.lua. Each scenario must be listed in the
+   Test scenarios for the Power Plant and Radar Dome bonuses (racoop|rules/buffs.yaml), run with `coop test -Map test-range`.
+   Adds to the Scenarios table from testrange-tests.lua. Each scenario must be listed in the
    `ScriptLobbyDropdown@test` values in rules.yaml.
 ]]
-
--- A single wave far in the future, so no enemies interfere with the test
-local function NoWaves()
-	WaveConfig = { { Delay = DateTime.Minutes(30), Groups = { { Units = { "e1" }, Lane = "north" } } } }
-end
 
 -- Try to place the building the player has finished producing on a free spot near their Construction Yard.
 -- Returns false if it isn't ready yet or there is no room.
@@ -70,7 +65,6 @@ end
 -- The listed price of Power Plants and Radar Domes starts at 2000 and rises by 1000 for each one of the
 -- same type the player owns or is producing, and drops again when one is gone.
 Scenarios["buffs-price"] = function()
-	NoWaves()
 	local player = Humans[1]
 	player.Cash = 50000
 
@@ -78,18 +72,18 @@ Scenarios["buffs-price"] = function()
 	CoopTest.AssertEqual(Test.ProductionCost(player, "dome"), 2000, "Radar Dome price with none")
 
 	-- Actors created from Lua join the world at the end of the tick, so each check waits a tick
-	local plants = { Place(player, "powr", 40, 4), Place(player, "powr", 44, 4) }
+	local plants = { Place(player, "powr", 20, 3), Place(player, "powr", 24, 3) }
 	Trigger.AfterDelay(1, function()
 		CoopTest.AssertEqual(Test.ProductionCost(player, "powr"), 4000, "Power Plant price with 2 (still being built)")
 		CoopTest.AssertEqual(Test.ProductionCost(player, "dome"), 2000, "Radar Dome price with 2 Power Plants")
-		Place(player, "dome", 48, 4)
+		Place(player, "dome", 28, 3)
 	end)
 
 	Trigger.AfterDelay(2, function()
 		CoopTest.AssertEqual(Test.ProductionCost(player, "dome"), 3000, "Radar Dome price with 1")
 
 		-- Another player's buildings don't count
-		Place(Enemy, "powr", 40, 28)
+		Place(Enemy, "powr", 36, 25)
 	end)
 
 	Trigger.AfterDelay(3, function()
@@ -110,11 +104,12 @@ end
 -- Each completed Power Plant adds 10% damage and each completed Radar Dome 10% weapon range
 -- to the owner's units and buildings. The player's buildings don't affect enemy units.
 Scenarios["buffs-modifiers"] = function()
-	NoWaves()
 	local player = Humans[1]
-	local tank = Place(player, "1tnk", 30, 16)
-	local turret = Place(player, "gun", 30, 18)
-	local enemyTank = Place(Enemy, "1tnk", 120, 16)
+	local tank = Place(player, "1tnk", 24, 10)
+	local turret = Place(player, "gun", 24, 12)
+
+	-- Far enough from the turret that they don't fight
+	local enemyTank = Place(Enemy, "1tnk", 38, 26)
 
 	local function Check(firepower, range, when)
 		Utils.Do({ tank, turret }, function(a)
@@ -128,8 +123,8 @@ Scenarios["buffs-modifiers"] = function()
 
 	Check(100, 100, "with no Power Plants or Radar Domes")
 
-	local plants = { Place(player, "powr", 40, 4), Place(player, "powr", 44, 4) }
-	Place(player, "dome", 48, 4)
+	local plants = { Place(player, "powr", 20, 3), Place(player, "powr", 24, 3) }
+	Place(player, "dome", 28, 3)
 
 	-- Actors created from Lua join the world at the end of the tick
 	Trigger.AfterDelay(1, function()
@@ -139,7 +134,7 @@ Scenarios["buffs-modifiers"] = function()
 	Trigger.AfterDelay(DateTime.Seconds(5), function()
 		Check(120, 110, "with 2 Power Plants and 1 Radar Dome")
 		plants[1].Destroy()
-		Place(player, "dome", 52, 4)
+		Place(player, "dome", 32, 3)
 	end)
 
 	Trigger.AfterDelay(DateTime.Seconds(10), function()
@@ -149,22 +144,23 @@ Scenarios["buffs-modifiers"] = function()
 end
 
 -- Built through production and placed, a Power Plant remembers what it cost, and selling it refunds half of that.
+-- Uses powr.test (rules.yaml), a Power Plant that builds almost instantly, so the test doesn't wait for production.
 Scenarios["buffs-refund"] = function()
-	NoWaves()
 	local player = Humans[1]
 	player.Cash = 50000
+	player.GrantCondition("test-buildings")
 
 	-- Not produced: worth its base cost
-	local placed = Place(player, "powr", 40, 4)
+	local placed = Place(player, "powr", 20, 3)
 	CoopTest.AssertEqual(Test.SellValue(placed), 2000, "sell value of a Power Plant that wasn't produced")
 	placed.Destroy()
 
 	Trigger.AfterDelay(DateTime.Seconds(1), function()
-		BuildAndPlace(player, "powr", function(first)
+		BuildAndPlace(player, "powr.test", function(first)
 			CoopTest.AssertEqual(Test.SellValue(first), 2000, "sell value of the first Power Plant")
 			CoopTest.AssertEqual(Test.ProductionCost(player, "powr"), 3000, "Power Plant price with 1")
 
-			BuildAndPlace(player, "powr", function(second)
+			BuildAndPlace(player, "powr.test", function(second)
 				CoopTest.AssertEqual(Test.SellValue(second), 3000, "sell value of the second Power Plant")
 				CoopTest.AssertEqual(Test.ProductionCost(player, "powr"), 4000, "Power Plant price with 2")
 

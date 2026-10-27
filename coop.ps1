@@ -83,6 +83,7 @@ function StartAutomatedGame([string[]]$extra)
 
 	# Environment variables are inherited by the game process and read by the engine.
 	$env:OPENRA_SCREENSHOT_DIR = ResultsDir
+	$env:OPENRA_LOG_DIR = LogDir
 	if (-not $Show) { $env:OPENRA_HIDDEN_WINDOW = "1" }
 	try
 	{
@@ -91,16 +92,14 @@ function StartAutomatedGame([string[]]$extra)
 	}
 	finally
 	{
-		Remove-Item Env:\OPENRA_SCREENSHOT_DIR, Env:\OPENRA_HIDDEN_WINDOW -ErrorAction SilentlyContinue
+		Remove-Item Env:\OPENRA_SCREENSHOT_DIR, Env:\OPENRA_LOG_DIR, Env:\OPENRA_HIDDEN_WINDOW -ErrorAction SilentlyContinue
 	}
 }
 
-# Same lookup order as launch-game.cmd's crash dialog.
+# Automated runs write their logs here (gitignored) instead of the user's OpenRA Logs folder, which play and duo still use.
 function LogDir
 {
-	if (Test-Path "$Root\Support\Logs") { return "$Root\Support\Logs" }
-	if (Test-Path "$env:USERPROFILE\Documents\OpenRA\Logs") { return "$env:USERPROFILE\Documents\OpenRA\Logs" }
-	return "$env:APPDATA\OpenRA\Logs"
+	return Join-Path $Root "test-results\logs"
 }
 
 # Screenshots taken by automated runs are saved here (gitignored) instead of the user's Screenshots folder.

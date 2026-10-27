@@ -1,0 +1,66 @@
+MapFormat: 12
+
+RequiresMod: racoop
+
+Title: Co-op Test Range
+
+Author: AndreasW
+
+Tileset: DESERT
+
+MapSize: 42,30
+
+Bounds: 1,1,40,28
+
+Visibility: Lobby
+
+Categories: Testing
+
+Players:
+	PlayerReference@Neutral:
+		Name: Neutral
+		OwnsWorld: True
+		NonCombatant: True
+		Faction: england
+	PlayerReference@Multi0:
+		Name: Multi0
+		Playable: True
+		AllowBots: False
+		Faction: Random
+		LockTeam: True
+		Team: 1
+		Allies: Multi1
+		Enemies: Creeps, Enemy
+	PlayerReference@Multi1:
+		Name: Multi1
+		Playable: True
+		AllowBots: False
+		Faction: Random
+		LockTeam: True
+		Team: 1
+		Allies: Multi0
+		Enemies: Creeps, Enemy
+	PlayerReference@Creeps:
+		Name: Creeps
+		NonCombatant: True
+		Faction: england
+		Enemies: Multi0, Multi1
+	PlayerReference@Enemy:
+		Name: Enemy
+		NonCombatant: True
+		Faction: soviet
+		Color: FE1100
+		HomeLocation: 36,15
+		Enemies: Multi0, Multi1
+
+Actors:
+	Actor0: mpspawn
+		Owner: Neutral
+		Location: 6,6
+	Actor1: mpspawn
+		Owner: Neutral
+		Location: 6,24
+
+Rules: rules.yaml
+
+FluentMessages: ra|fluent/lua.ftl, racoop|fluent/lua.ftl, map.ftl

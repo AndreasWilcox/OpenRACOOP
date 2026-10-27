@@ -108,7 +108,11 @@ namespace OpenRA
 
 		static IEnumerable<string> FilenamesForChannel(string baseFilename)
 		{
-			var path = Platform.SupportDir + "Logs";
+			// Launch the game with OPENRA_LOG_DIR to write logs somewhere else (e.g. for automated tests)
+			var path = Environment.GetEnvironmentVariable("OPENRA_LOG_DIR");
+			if (string.IsNullOrEmpty(path))
+				path = Platform.SupportDir + "Logs";
+
 			Directory.CreateDirectory(path);
 
 			for (var i = 0; i < CreateLogFileMaxRetryCount; i++)

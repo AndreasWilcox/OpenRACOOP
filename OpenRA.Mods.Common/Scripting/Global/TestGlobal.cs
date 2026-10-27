@@ -162,11 +162,5 @@ namespace OpenRA.Mods.Common.Scripting
 		{
 			target.Trait<IHealth>().InflictDamage(target, attacker, new Damage(amount), true);
 		}
-
-		[Desc("The damage the player has dealt to the target that counts towards its GivesDamageShareBounty.")]
-		public int DamageDealt(Actor target, Player player)
-		{
-			return target.TraitOrDefault<GivesDamageShareBounty>()?.DamageDealtBy(player) ?? 0;
-		}
 	}
 }

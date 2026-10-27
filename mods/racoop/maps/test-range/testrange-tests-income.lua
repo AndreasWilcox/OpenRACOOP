@@ -1,8 +1,8 @@
 --[[
-   Test scenarios for kill income (GivesDamageShareBounty in racoop|rules/income.yaml), added to the Scenarios table
-   from twolane-tests.lua. Damage is dealt with Test.Damage, so the results don't depend on combat.
-   With only one human in a test game, the rules for several damaging players (most damage wins, ties go to the
-   last hitter) are covered by the DamageShareLedger unit tests in OpenRA.Test instead.
+   Test scenarios for kill income (GivesSharedBounty in racoop|rules/income.yaml), added to the Scenarios table
+   from testrange-tests.lua. Damage is dealt with Test.Damage, so the results don't depend on combat.
+   With only one human in a test game, that human gets the whole bounty. Splitting it between several players
+   is covered by the SharedBounty unit tests in OpenRA.Test instead.
 ]]
 
 -- An actor of the first human to deal damage with. Any actor counts for its owner, even a building.
@@ -10,12 +10,12 @@ local function HumanAttacker()
 	return Humans[1].GetActorsByType("fact")[1]
 end
 
--- An enemy unit standing between the lanes, far from the players, with no orders.
+-- An enemy unit in the east, away from the players, with no orders.
 local function SpawnEnemy(type, y)
-	return Actor.Create(type, true, { Owner = Enemy, Location = CPos.New(40, y) })
+	return Actor.Create(type, true, { Owner = Enemy, Location = CPos.New(28, y) })
 end
 
--- Killing an enemy unit pays 30% of its cost to the player that damaged it, and RA's kill bounty doesn't pay as well.
+-- Killing an enemy unit pays 30% of its cost, and RA's kill bounty doesn't pay as well.
 Scenarios["income-kill"] = function()
 	local player = Humans[1]
 	CoopTest.Assert(not player.HasPrerequisites({ "global-bounty" }), "RA's kill bounty option is off")
@@ -52,33 +52,24 @@ Scenarios["income-ranked"] = function()
 	CoopTest.Pass()
 end
 
--- Only the damage the unit still had HP for counts, and healing doesn't take damage away.
-Scenarios["income-overkill"] = function()
+-- The kill pays even when the enemy did most of the damage before a player finished the unit off.
+Scenarios["income-any-killer"] = function()
 	local player = Humans[1]
 	local tank = SpawnEnemy("2tnk", 18)
-	local hp = tank.MaxHealth
+	local other = SpawnEnemy("e1", 20)
+	Test.Damage(tank, other, tank.MaxHealth - 1)
 
-	Test.Damage(tank, HumanAttacker(), 1000)
-	CoopTest.AssertEqual(Test.DamageDealt(tank, player), 1000, "damage counted for a normal hit")
-
-	-- Healing (negative damage) raises the HP but doesn't count against the damage dealt
-	Test.Damage(tank, HumanAttacker(), -500)
-	CoopTest.AssertEqual(tank.Health, hp - 500, "health after healing")
-	CoopTest.AssertEqual(Test.DamageDealt(tank, player), 1000, "damage counted after healing")
-
-	-- A hit far larger than the HP left only counts the HP that was left
 	local cash = player.Cash
-	Test.Damage(tank, HumanAttacker(), hp * 10)
+	Test.Damage(tank, HumanAttacker(), 1)
 	CoopTest.Assert(tank.IsDead, "the medium tank is dead")
-	CoopTest.AssertEqual(Test.DamageDealt(tank, player), 1000 + (hp - 500), "damage counted after an overkill hit")
 
 	-- 30% of 850
-	CoopTest.AssertEqual(player.Cash - cash, 255, "cash for killing a medium tank costing 850")
+	CoopTest.AssertEqual(player.Cash - cash, 255, "cash for finishing off a medium tank costing 850")
 	CoopTest.Pass()
 end
 
--- Nobody is paid for units that no player damaged, and the enemy isn't paid for killing player units.
-Scenarios["income-no-damage"] = function()
+-- Nobody is paid for units that no player killed, and the enemy isn't paid for killing player units.
+Scenarios["income-not-player-kill"] = function()
 	local player = Humans[1]
 	local cash = player.Cash
 	local enemyCash = Enemy.Cash
@@ -88,17 +79,16 @@ Scenarios["income-no-damage"] = function()
 	rifle.Kill()
 	CoopTest.Assert(rifle.IsDead, "the rifle infantry killed by the script is dead")
 
-	-- Damaged and killed by another enemy unit
+	-- Damaged by a player, then killed by another enemy unit
 	local tank = SpawnEnemy("2tnk", 22)
 	local other = SpawnEnemy("e1", 24)
-	Test.Damage(tank, other, 1000)
+	Test.Damage(tank, HumanAttacker(), 100)
 	Test.Damage(tank, other, tank.MaxHealth)
 	CoopTest.Assert(tank.IsDead, "the medium tank killed by an enemy unit is dead")
-	CoopTest.AssertEqual(Test.DamageDealt(tank, Enemy), 0, "damage counted for the enemy")
-	CoopTest.AssertEqual(player.Cash, cash, "player cash after kills without player damage")
+	CoopTest.AssertEqual(player.Cash, cash, "player cash after kills by others than players")
 
 	-- A player unit killed by an enemy unit: the non-combatant enemy can't be paid
-	local own = Actor.Create("e1", true, { Owner = player, Location = CPos.New(42, 24) })
+	local own = Actor.Create("e1", true, { Owner = player, Location = CPos.New(30, 24) })
 	Test.Damage(own, other, own.MaxHealth)
 	CoopTest.Assert(own.IsDead, "the player's rifle infantry is dead")
 	CoopTest.AssertEqual(Enemy.Cash, enemyCash, "enemy cash after killing a player unit")

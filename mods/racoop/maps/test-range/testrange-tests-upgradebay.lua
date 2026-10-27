@@ -1,15 +1,13 @@
 --[[
-   Test scenarios for the Upgrade Bay (racoop|rules/upgradebay.yaml), added to the Scenarios table from twolane-tests.lua.
+   Test scenarios for the Upgrade Bay (racoop|rules/upgradebay.yaml), added to the Scenarios table from testrange-tests.lua.
    They promote through the bay's Promote script property, which runs the same code as a player's promote order.
 ]]
 
 -- Wait for the bay's build animation: it can't promote until it has finished.
 local BayReady = DateTime.Seconds(3)
 
--- An Upgrade Bay and a known amount of cash for the first human. Waves are pushed back so they don't interfere.
+-- An Upgrade Bay and a known amount of cash for the first human.
 local function SetUp(cash)
-	WaveConfig = { { Delay = DateTime.Minutes(10), Groups = { { Units = { "e1" }, Lane = "north" } } } }
-
 	local player = Humans[1]
 	player.Resources = 0
 	player.Cash = cash
@@ -21,7 +19,7 @@ end
 -- Promoting stops at Elite, without charging for the refused promotion. Aircraft can be promoted too.
 Scenarios["upgrade-promote"] = function()
 	local player, bay = SetUp(10000)
-	local tank = Actor.Create("1tnk", true, { Owner = player, Location = CPos.New(60, 16) })
+	local tank = Actor.Create("1tnk", true, { Owner = player, Location = CPos.New(36, 16) })
 	local heli = Actor.Create("heli", true, { Owner = player, Location = CPos.New(20, 16) })
 
 	Trigger.AfterDelay(BayReady, function()
@@ -63,7 +61,7 @@ Scenarios["upgrade-refused"] = function()
 	local player, bay = SetUp(100)
 	local tank = Actor.Create("1tnk", true, { Owner = player, Location = CPos.New(10, 20) })
 	local truck = Actor.Create("truk", true, { Owner = player, Location = CPos.New(12, 20) })
-	local enemy = Actor.Create("e1", true, { Owner = Enemy, Location = CPos.New(60, 16) })
+	local enemy = Actor.Create("e1", true, { Owner = Enemy, Location = CPos.New(36, 16) })
 
 	Trigger.AfterDelay(BayReady, function()
 		CoopTest.Assert(not bay.Promote(tank), "a promotion costing more than the player's cash is refused")

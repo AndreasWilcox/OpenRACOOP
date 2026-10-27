@@ -1,5 +1,5 @@
 ## twolane.lua
-twolane-welcome = Welcome, commanders. Soviet troops will attack from the east along both lanes. Hold the line together!
+twolane-welcome = Welcome, commanders. Enemy troops will attack from the east along two lanes. Hold the line together!
 
 ## waves.lua: shown while counting down to each wave
 twolane-wave-1-hint = Rifle infantry on both lanes
@@ -25,20 +25,3 @@ twolane-test-waves = Waves
 twolane-test-air = Air
 twolane-test-victory = Victory
 twolane-test-call-early = Call early
-twolane-test-force-infantry = Infantry force
-twolane-test-force-tanks = Tanks force
-twolane-test-force-air = Air force
-twolane-test-force-support = Support force
-twolane-test-upgrade-promote = Upgrade Bay promotions
-twolane-test-upgrade-refused = Upgrade Bay refusals
-twolane-test-buffs-price = Power Plant and Radar Dome prices
-twolane-test-buffs-modifiers = Power Plant and Radar Dome bonuses
-twolane-test-buffs-refund = Power Plant refund
-twolane-test-powers-infantry = Infantry powers
-twolane-test-powers-tanks = Tanks powers
-twolane-test-powers-air = Air powers
-twolane-test-powers-support = Support powers
-twolane-test-income-kill = Kill income
-twolane-test-income-ranked = Kill income for a ranked enemy
-twolane-test-income-overkill = Kill income overkill
-twolane-test-income-no-damage = Kill income without player damage

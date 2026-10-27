@@ -63,13 +63,14 @@ Running PowerShell with `2>&1` on `coop.ps1` breaks the build: `dotnet` writes t
 - **Maps:**
   - `maps/two-lane` is the main map. Up to 4 allied humans (Multi0–3) build in the west and face a non-combatant `Enemy` with no AI, base or starting units. Waves come from the east down a north and a south lane, along named `waypoint` actors (`NorthSpawn`, `NorthEastGap`, `NorthWestGap`, and the same for South).
   - `maps/coop-01` is the older test map, with its own simple fixed-interval script.
+  - `maps/test-range` is a small, flat map (40×28) for test scenarios that don't depend on a map's layout: forces, Upgrade Bay, buffs, powers and income. It has no waves; the players start in the west, and scenarios put their targets in the east (x 20–40). It was made by shrinking a copy of Two Lanes with `--resize-map` (new cells repeat the tile at 0,0), so it can be regrown the same way.
   - Slots nobody joined aren't created, so human players may be nil.
 - **Forces:**
   - `rules/forces.yaml` replaces RA's factions with the four forces (`infantry`, `tanks`, `air`, `support`). The old factions stay non-selectable for the Enemy, Neutral and shellmap players.
   - The Construction Yard provides `force`, `force.<name>` and `force.vehicles` prerequisites. Each force builds only its own buildings and units; every other buildable RA actor gets `~disabled`. Set it on the actor itself: a `Buildable` inherited from a template is overridden by the actor's own.
   - Each force's sidebar look, voices and lobby flag map to the Allied or Soviet versions, in `metrics.yaml`, `audio/voices.yaml` and the `flags` regions in `chrome.yaml`.
   - The Air force's War Factory is a separate actor, `weap.air`, so it can cost less and build Mobile Flak in the Aircraft tab.
-- **Other features, one rules file each** (plus a matching `twolane-tests-<feature>.lua`):
+- **Other features, one rules file each** (plus a matching `test-range/testrange-tests-<feature>.lua`):
   - `upgradebay.yaml`: the Upgrade Bay (`upgr`). The `PromotesUnits` trait handles "select the bay, click a unit"; Lua uses `bay.Promote(unit)`.
   - `buffs.yaml`: each finished Power Plant or Radar Dome gives the owner's units and buildings +10% damage or range.
     - Their price is 2000 + 1000 for each one owned or queued.
@@ -78,7 +79,7 @@ Running PowerShell with `2>&1` on `coop.ps1` breaks the build: `dotnet` writes t
   - `powers.yaml`: Tech Center powers, gated by `force.<name>`.
     - Infantry: Paratroopers. Tanks: Flash Freeze. Support: Parabombs and Cruiser Shelling (`ProjectileBarragePower`). Air has none yet.
     - Each power has its own `OrderName`, because powers are keyed by it.
-  - `income.yaml`: `GivesDamageShareBounty` pays 30% of a killed unit's value, including its rank, to the player who did the most damage. RA's kill bounty option is locked off.
+  - `income.yaml`: when a player kills a unit, `GivesSharedBounty` splits 30% of its value, including its rank, evenly between all players (30%/N each, whoever did the damage). Kills by the script or the enemy pay nothing. RA's kill bounty option is locked off.
 - **Waves:**
   - A map defines its waves as `WaveConfig` in `waves.lua`, which documents the format. `scripts/coopwaves.lua` runs them with `CoopWaves.Start(config, lanes, humans, enemy)`. It validates the config on load, spawns groups, makes enemies prefer units over buildings, and decides victory (every wave unit dead) and defeat (no human Construction Yard or MCV left).
   - `rules/coop.yaml` removes `ConquestVictoryConditions`, because its objective can't complete against a non-combatant enemy.
@@ -95,9 +96,11 @@ Running PowerShell with `2>&1` on `coop.ps1` breaks the build: `dotnet` writes t
   - Options: `-Map <folder>` (default coop-01), `-Scenario <name>`, `-NoBuild`, `-Show` (show the window for smoke/test), `-Faction <force>` (default random).
   - Test scenarios named `force-<faction>` or `powers-<faction>` always run as that faction.
   - `smoke`, `test` and `check` run in a hidden window.
-- **Automated tests:** each scenario is a Lua function in `<map>-tests.lua` (`Scenarios["name"] = function() ... end`) using the `CoopTest.*` helpers from `scripts/cooptest.lua`. List each scenario in the map's hidden `ScriptLobbyDropdown@test`, and call `CoopTest.Run(Scenarios)` from `WorldLoaded`. On two-lane it runs before `CoopWaves.Start`, so a scenario can swap in its own `WaveConfig`. Results are written as `coop-test:` lines to lua.log, and screenshots go to `test-results/` (gitignored).
-  - `check` only covers coop-01. Run `.\coop test -Map two-lane` as well.
-  - Close any running game first: an open game holds `lua.log`, so test runs log to `lua.log.1` and time out.
+- **Automated tests:** each scenario is a Lua function in `<map>-tests.lua` (`Scenarios["name"] = function() ... end`) using the `CoopTest.*` helpers from `scripts/cooptest.lua`. List each scenario in the map's hidden `ScriptLobbyDropdown@test`, and call `CoopTest.Run(Scenarios)` from `WorldLoaded`. On two-lane it runs before `CoopWaves.Start`, so a scenario can swap in its own `WaveConfig`. Results are written as `coop-test:` lines to lua.log. `smoke`, `test` and `check` write their logs to `test-results/logs/` and screenshots to `test-results/<map>/` (gitignored); `play` and `duo` keep the normal OpenRA Logs folder.
+  - `check` only covers coop-01. Run `.\coop test -Map test-range` (about 3 minutes) and `.\coop test -Map two-lane` (waves, about 2 minutes) as well.
+  - Scenarios that don't need a particular layout go on test-range. Two Lanes keeps only the wave scenarios.
+  - test-range has test-only actors, hidden until a scenario calls `player.GrantCondition("test-buildings")`: `powr.test` is a Power Plant that builds almost instantly, so scenarios can test production without waiting.
+  - A test game left running holds `test-results/logs/lua.log`, so the next run logs to `lua.log.1` and times out. Games started with `play` or `duo` log elsewhere and don't interfere.
   - The test speed is about 8× normal, so on-screen countdowns, which are in real time like the game clock, read shorter.
 - **Engine additions for this:**
   - `Launch.LobbyOptions=id=value,...`, applied with `Launch.Map` or when joining a server as its admin. `faction=<name>` sets the local player's faction.
@@ -105,7 +108,7 @@ Running PowerShell with `2>&1` on `coop.ps1` breaks the build: `dotnet` writes t
   - In Lua tests:
     - Actors created with `Actor.Create` join the world at the end of the tick, so wait a tick before checking anything that depends on them.
     - Lua returns a new wrapper object for the same actor each time, so key tables by `tostring(actor)`, not by the actor.
-  - Environment variables `OPENRA_HIDDEN_WINDOW=1` and `OPENRA_SCREENSHOT_DIR`.
+  - Environment variables `OPENRA_HIDDEN_WINDOW=1`, `OPENRA_SCREENSHOT_DIR` and `OPENRA_LOG_DIR`.
   - The Lua global `Test.Screenshot(name)` (`OpenRA.Mods.Common/Scripting/Global/TestGlobal.cs`).
   - `actor.Detonate(target)` for MAD tanks (`OpenRA.Mods.Cnc/Scripting/Properties/MadTankProperties.cs`). To allow it, `MadTank` and `MadTankInfo` are now public.
 

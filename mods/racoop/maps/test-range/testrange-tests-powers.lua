@@ -1,6 +1,6 @@
 --[[
    Automated test scenarios for the Tech Center support powers (racoop|rules/powers.yaml), run with `coop test`.
-   Adds to the Scenarios table from twolane-tests.lua. Each scenario must be listed in the
+   Adds to the Scenarios table from testrange-tests.lua. Each scenario must be listed in the
    `ScriptLobbyDropdown@test` values in rules.yaml. Scenarios named powers-<faction> run as that faction (see coop.ps1).
 ]]
 
@@ -26,11 +26,6 @@ local function Powers(player)
 	return table.concat(Test.SupportPowers(player), ", ")
 end
 
--- A single wave far in the future, so no enemies interfere with the test
-local function NoWaves()
-	WaveConfig = { { Delay = DateTime.Minutes(30), Groups = { { Units = { "e1" }, Lane = "north" } } } }
-end
-
 -- An idle unit that won't shoot at anything
 local function Dummy(type, owner, cell)
 	local actor = Actor.Create(type, true, { Owner = owner, Location = cell })
@@ -38,20 +33,37 @@ local function Dummy(type, owner, cell)
 	return actor
 end
 
+-- Check `condition` every second until it is true or `limit` ticks have passed, then call `after(result)`.
+local function WaitFor(condition, limit, after)
+	local waited = 0
+	local poll
+	poll = function()
+		if condition() or waited >= limit then
+			after(condition())
+			return
+		end
+
+		waited = waited + DateTime.Seconds(1)
+		Trigger.AfterDelay(DateTime.Seconds(1), poll)
+	end
+
+	poll()
+end
+
 -- Flash Freeze slows every unit in its 5x5 area to 60% speed for 20 seconds: own and enemy, on the ground and in the air.
 local function TestFlashFreeze(player, done)
-	local target = CPos.New(41, 16)
+	local target = CPos.New(29, 16)
 	local frozen =
 	{
-		Dummy("3tnk", player, CPos.New(40, 15)),
-		Dummy("3tnk", Enemy, CPos.New(42, 17)),
-		Dummy("e1", Enemy, CPos.New(39, 18)),
-		Dummy("1tnk", player, CPos.New(43, 14))
+		Dummy("3tnk", player, CPos.New(28, 15)),
+		Dummy("3tnk", Enemy, CPos.New(30, 17)),
+		Dummy("e1", Enemy, CPos.New(27, 18)),
+		Dummy("1tnk", player, CPos.New(31, 14))
 	}
-	local outside = Dummy("3tnk", Enemy, CPos.New(46, 16))
+	local outside = Dummy("3tnk", Enemy, CPos.New(34, 16))
 
 	-- A helicopter hovering over the area
-	local heli = Dummy("heli", player, CPos.New(41, 8))
+	local heli = Dummy("heli", player, CPos.New(29, 8))
 	heli.Move(target)
 	frozen[#frozen + 1] = heli
 
@@ -90,12 +102,12 @@ end
 -- Every cell of the area has a tank, so each shell damages at least one. The shells are 10 ticks apart,
 -- so the number of distinct times tanks were damaged is the number of shells.
 local function TestCruiserShelling(player, done)
-	-- The area around (41, 15) is x 40-43, y 14-17
-	local target = CPos.New(41, 15)
+	-- The area around (29, 15) is x 28-31, y 14-17
+	local target = CPos.New(29, 15)
 	local impacts = { }
 	local impactCount = 0
 	local wrongAttacker = false
-	for x = 40, 43 do
+	for x = 28, 31 do
 		for y = 14, 17 do
 			local tank = Dummy("3tnk", Enemy, CPos.New(x, y))
 			Trigger.OnDamaged(tank, function(_, attacker)
@@ -113,7 +125,7 @@ local function TestCruiserShelling(player, done)
 
 	-- Tanks 3 cells outside the area on each side must not be hit
 	local outsideHits = 0
-	Utils.Do({ CPos.New(37, 15), CPos.New(46, 15), CPos.New(41, 11), CPos.New(41, 20) }, function(cell)
+	Utils.Do({ CPos.New(25, 15), CPos.New(34, 15), CPos.New(29, 11), CPos.New(29, 20) }, function(cell)
 		Trigger.OnDamaged(Dummy("3tnk", Enemy, cell), function()
 			outsideHits = outsideHits + 1
 		end)
@@ -125,7 +137,7 @@ local function TestCruiserShelling(player, done)
 
 	-- The shells are on their way in from the west
 	Trigger.AfterDelay(DateTime.Seconds(2) + 40, function()
-		Camera.Position = Map.CenterOfCell(CPos.New(28, 15))
+		Camera.Position = Map.CenterOfCell(CPos.New(16, 15))
 		CoopTest.Screenshot("cruiser-shells-incoming")
 	end)
 
@@ -140,9 +152,15 @@ end
 -- Paratroopers drop five infantry (with one rank) for the player.
 local function TestParatroopers(player, done)
 	local before = #player.GetActorsByTypes({ "e1r1", "e3r1" })
-	CoopTest.Assert(Test.ActivateSupportPower(player, "CoopParatroopers", CPos.New(40, 16)), "Paratroopers activated")
-	Trigger.AfterDelay(DateTime.Seconds(40), function()
-		CoopTest.AssertEqual(#player.GetActorsByTypes({ "e1r1", "e3r1" }) - before, 5, "paratroopers landed")
+	CoopTest.Assert(Test.ActivateSupportPower(player, "CoopParatroopers", CPos.New(28, 16)), "Paratroopers activated")
+
+	-- Paratroopers on the ground (still falling ones are in the air)
+	local landed = function()
+		local grounded = Utils.Where(player.GetActorsByTypes({ "e1r1", "e3r1" }), function(a) return a.CenterPosition.Z == 0 end)
+		return #grounded - before
+	end
+	WaitFor(function() return landed() >= 5 end, DateTime.Seconds(40), function()
+		CoopTest.AssertEqual(landed(), 5, "paratroopers landed")
 		done()
 	end)
 end
@@ -150,11 +168,11 @@ end
 -- Parabombs damage a tank at the target.
 local function TestParabombs(player, done)
 	local hit = false
-	local tank = Dummy("3tnk", Enemy, CPos.New(40, 22))
+	local tank = Dummy("3tnk", Enemy, CPos.New(28, 22))
 	Trigger.OnDamaged(tank, function() hit = true end)
-	CoopTest.Assert(Test.ActivateSupportPower(player, "CoopParabombs", CPos.New(40, 22)), "Parabombs activated")
-	Trigger.AfterDelay(DateTime.Seconds(40), function()
-		CoopTest.Assert(hit, "the parabombs hit the tank at the target")
+	CoopTest.Assert(Test.ActivateSupportPower(player, "CoopParabombs", CPos.New(28, 22)), "Parabombs activated")
+	WaitFor(function() return hit end, DateTime.Seconds(40), function(result)
+		CoopTest.Assert(result, "the parabombs hit the tank at the target")
 		done()
 	end)
 end
@@ -182,8 +200,6 @@ end
 -- With a Tech Center, a force has exactly its own support powers, and they start charging.
 for name, powers in pairs(ForcePowers) do
 	Scenarios["powers-" .. name] = function()
-		NoWaves()
-
 		local player = Humans[1]
 		CoopTest.AssertEqual(player.Faction, name, "force")
 

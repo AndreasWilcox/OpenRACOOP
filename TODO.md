@@ -1,14 +1,14 @@
 # Co-op mode: open checks and follow-ups
 
 ## Test by hand (`.\coop duo -Map two-lane`)
-These were built and pass the automated tests (`.\coop test -Map two-lane`) but haven't been tried by a player yet.
+These were built and pass the automated tests (`.\coop test -Map test-range`) but haven't been tried by a player yet.
 
 - [ ] **Upgrade Bay:** with the bay selected, clicking your own unit promotes it, for 25% of its cost. The cursor shows whether it's allowed. Check this with the default and the classic mouse styles.
 - [ ] **Tech Center powers over the network,** with one client per force:
   - [ ] Infantry: Paratroopers
   - [ ] Tanks: Flash Freeze (also slows your own units)
   - [ ] Support: Parabombs and Cruiser Shelling. Cruiser Shelling may be too weak for a 3-minute cooldown.
-- [ ] **Kill income with two players:** the player who did the most damage gets 30% of the unit's value, and the "+$" shows for them. Automated tests only cover this with one player.
+- [ ] **Kill income with two players:** when either player kills a unit, both get 30%/2 of its value (a rifle infantry gives +15 each), and each sees their own "+$15". Automated tests only cover this with one player.
 - [ ] **Power Plants and Radar Domes:** the price rises by 1000 per one owned or queued, selling refunds half of what was paid, and the bonuses apply.
 - [ ] **Airfield and Helipad repairs** are free. Also check that players' Artillery and V2s do 40% less damage.
 
