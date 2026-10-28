@@ -87,6 +87,7 @@ NOTE: Need ideas for fitting powers so each team has at least one.
 ### Tanks
 - Flash Freeze (*new*) - Makes units in a 5x5 area slow down to 60% speed for 20 seconds. Check if OpenRA has a way to do this already.
 ### Air
+- Strafing Run (*new*) - Three Yaks fly across the map in a chosen direction (like Parabombs) and strafe a 10-cell line through the target, about 3 cells wide. Deadly to infantry and light vehicles, weak against tanks. Only hurts enemies. The Yaks can be shot down on the way. 3 minute cooldown.
 ### Support
 - Parabombs - Previously Ukraine's support power. Cooldown should be 4 minutes.
 - Cruiser Shelling (*new*) - Fires in a barrage of 6 Cruiser shells from offscreen hitting an area of 4x4 squares. We don't see the cruisers themselves, just the shots coming in from the left side of the map. Can be placed anywhere. 3 minute cooldown.
@@ -116,7 +117,7 @@ Each player starts with a Construction Yard which they can't undeploy. Building 
 - War Factory - Builds all support vehicles. Costs 1000.
 
 ## Resources
-Players start out with 4000. Ore is not gathered anymore, players get money by killing enemies and completing side objectives. Whoever did the most total damage gets 30% of the unit's cost as income when it dies (use last hit if two players have the same damage). Enemies that start with veterancy pay out by the same percentage.
+Players start out with 4000. Ore is not gathered anymore, players get money by killing enemies and completing side objectives. When a unit dies 80% of the unit's cost is shared between all players. Enemies that start with veterancy pay out by the same percentage.
 It's possible to send money between players as well. Power/energy is no longer used; it doesn't have to be removed but we can just set buildings to not use power.
 
 ## Map
@@ -125,13 +126,28 @@ Enemies spawn at either lane and move & attack until they reach the player's bas
 
 ## Side objectives
 NOTE: Hold on with implementing this until the other stuff is done.
-During the game while defending there should occur side objectives that will give players money for completing. These objectives gives incentives for players to be more adaptable and gives risk/reward choices.
+During the game while defending there should occur side objectives that will give players money for completing. These objectives gives incentives for players to be more adaptable and gives risk/reward choices. Money is shared between players on completion.
 
 ### Destroy radar vehicle
-A radar vehicle will spawn and move to one of a few defined points. Players need to destroy it within a timelimit before it leaves. Money logic is the same as with other enemy units. I think we can reuse the M.A.D. Tank for this but just disable its firing.
+A radar vehicle will spawn and move to one of a few defined points. Players need to destroy it within a timelimit before it leaves. I think we can reuse the M.A.D. Tank for this but just disable its firing.
 
 ### Resupply drop
 A money crate will spawn somewhere towards the enemy's side. The player that touches the crate gets the money.
 
 ## Other notes
 Full map will always be visible to all players.
+
+
+# Playtest feedback
+decrease build time (especially air)
+no friendly fire on mines. or at all I think
+decrease wave times (often manually clicked next)
+money for starting next wave earlier
+more enemies
+a little bit more money at start
+enemy defences to push through. Enemy base?
+boat artillery offscreen too weak
+
+maybe new units
+
+less damage overall to slow down fights
